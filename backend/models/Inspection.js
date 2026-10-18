@@ -194,7 +194,7 @@ const formDataSchema = new mongoose.Schema(
 
 const inspectionSchema = new mongoose.Schema(
   {
-    inspectionNumber: { type: String, required: true, unique: true, trim: true },
+    inspectionNumber: { type: String, required: true, trim: true },
     outlet: { type: mongoose.Schema.Types.ObjectId, ref: 'Outlet', required: true },
     inspector: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     inspectionDate: { type: Date, required: true, default: Date.now },
