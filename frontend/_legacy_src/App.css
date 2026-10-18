@@ -1,0 +1,277 @@
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.75rem;
+}
+
+.data-table th,
+.data-table td {
+  border-bottom: 1px solid var(--kvb-border);
+  padding: 0.85rem 0.75rem;
+  text-align: left;
+}
+
+.data-table th {
+  font-size: 0.74rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--kvb-muted);
+}
+
+.empty-state {
+  color: var(--kvb-muted);
+  text-align: center;
+  padding: 1.2rem;
+}
+
+.list-table-wrap {
+  overflow-x: auto;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.35rem 0.7rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.status-badge.DRAFT {
+  background: #edf2f7;
+  color: #374151;
+}
+
+.status-badge.SUBMITTED,
+.status-badge.PENDING_DIRECTOR_REVIEW {
+  background: #e8f3ff;
+  color: #1f5dbf;
+}
+
+.status-badge.DIRECTOR_APPROVED,
+.status-badge.PENDING_CEO_REVIEW {
+  background: #eafaf1;
+  color: #1a7f45;
+}
+
+.status-badge.RETURNED_TO_INSPECTOR {
+  background: #fff3e8;
+  color: #b85c00;
+}
+
+.status-badge.FINAL_APPROVED {
+  background: #e7f8ee;
+  color: #116c3a;
+}
+
+.action-row {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.justify-end {
+  justify-content: flex-end;
+}
+
+.top-gap {
+  margin-top: 1rem;
+}
+
+.narrow-box {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.form-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.two-col {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.full-width {
+  grid-column: 1 / -1;
+}
+
+.field-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  font-weight: 600;
+  color: var(--kvb-navy);
+}
+
+.field-label input,
+.field-label select,
+.field-label textarea {
+  border: 1px solid var(--kvb-border);
+  border-radius: 10px;
+  padding: 0.8rem 0.9rem;
+  background: white;
+  min-height: 46px;
+}
+
+.field-label textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+.progress-panel {
+  overflow-x: auto;
+}
+
+.stepper {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.step {
+  flex: 1 1 150px;
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--kvb-border);
+  border-radius: 999px;
+  padding: 0.5rem 0.6rem;
+  font-size: 0.72rem;
+  color: var(--kvb-muted);
+  background: #f8faf8;
+}
+
+.step.active {
+  background: rgba(15, 107, 62, 0.08);
+  color: var(--kvb-dark-green);
+  border-color: rgba(15, 107, 62, 0.25);
+  font-weight: 700;
+}
+
+.form-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.section-header h2 {
+  margin-bottom: 0;
+}
+
+.checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.75rem;
+}
+
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  background: #f9faf7;
+  border: 1px solid var(--kvb-border);
+  border-radius: 10px;
+  padding: 0.8rem 0.9rem;
+}
+
+.check-row input {
+  width: 20px;
+  height: 20px;
+}
+
+.attendant-box {
+  border: 1px solid var(--kvb-border);
+  border-radius: 12px;
+  padding: 1rem;
+  background: #fbfcfb;
+}
+
+.stacked-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.review-panel dl {
+  display: grid;
+  gap: 0.9rem;
+  margin: 0;
+}
+
+.review-panel dl div {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 0.8rem;
+  border-bottom: 1px solid var(--kvb-border);
+  padding-bottom: 0.75rem;
+}
+
+.review-panel dt {
+  font-weight: 700;
+  color: var(--kvb-navy);
+}
+
+.review-panel dd {
+  margin: 0;
+  color: var(--kvb-ink);
+}
+
+.button-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.kvb-muted {
+  color: var(--kvb-muted);
+}
+
+.kvb-green-text {
+  color: var(--kvb-green);
+}
+
+.kvb-danger-text {
+  color: var(--kvb-danger);
+}
+
+.step.complete {
+  background: rgba(26, 127, 69, 0.08);
+  color: #1a7f45;
+  border-color: rgba(26, 127, 69, 0.25);
+}
+
+.inspection-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.inspection-header .inspection-num {
+  font-family: 'Courier New', monospace;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--kvb-navy);
+}
+
+.signature-preview {
+  max-width: 300px;
+  max-height: 120px;
+  object-fit: contain;
+  border: 1px solid var(--kvb-border);
+  border-radius: 8px;
+  padding: 4px;
+  background: white;
+}
+
+@media (max-width: 768px) {
+  .inspection-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+

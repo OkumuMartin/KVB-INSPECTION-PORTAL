@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 120" width="520" height="120" role="img" aria-label="Kenya Veterinary Board Logo">
+  <defs>
+    <linearGradient id="kvb-tricolor" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#000000"/>
+      <stop offset="50%" stop-color="#CE1126"/>
+      <stop offset="100%" stop-color="#007A5A"/>
+    </linearGradient>
+    <linearGradient id="kvb-green-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0f5132"/>
+      <stop offset="100%" stop-color="#1a7b32"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(0, 15)">
+    <rect x="0" y="0" width="480" height="90" rx="12" fill="url(#kvb-green-gradient)" opacity="0.05"/>
+    <g transform="translate(10, 10)">
+      <path d="M20,50 L20,20 L40,20 L40,50 Z" fill="#000000" stroke="#CE1126" stroke-width="1"/>
+      <path d="M40,20 L55,10 L55,50 L40,50 Z" fill="#CE1126"/>
+      <path d="M55,10 L70,20 L70,50 L55,50 Z" fill="#007A5A"/>
+      <path d="M40,50 L55,40 L70,50 Z" fill="#007A5A"/>
+      <circle cx="30" cy="35" r="2" fill="#FFD700"/>
+    </g>
+    <g transform="translate(85, 18)" font-family="Arial, sans-serif">
+      <text x="0" y="18" font-size="16" font-weight="bold" fill="#102a43">KENYA VETERINARY BOARD</text>
+      <text x="0" y="38" font-size="12" fill="#0f5132">Veterinary Inspection Portal</text>
+    </g>
+    <g transform="translate(345, 25)" fill="url(#kvb-tricolor)">
+      <rect x="0" y="0" width="15" height="30" rx="3"/>
+      <text x="30" y="20" font-family="Arial, sans-serif" font-size="14" font-weight="800" fill="#102a43">KVB</text>
+    </g>
+  </g>
+</svg>
