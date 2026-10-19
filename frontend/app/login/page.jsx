@@ -39,211 +39,23 @@ export default function LoginPage() {
   return (
     <>
       <style>{`
-        /* Override stale cached CSS backdrop-filter blur */
-        .kvb-auth-card, .kvb-logo-pill, .kvb-services-grid, .kvb-left-footer span {
-          backdrop-filter: none !important;
-          -webkit-backdrop-filter: none !important;
-        }
-        .kvb-logo-pill-text-main { color: #ffffff !important; }
-        .kvb-logo-pill-text-sub { color: rgba(255,255,255,0.85) !important; }
-
-        /* ===== Login page — two-panel side-by-side design ===== */
+        /* Login page shell — full-bleed centered layout */
         .kvb-auth-shell {
           width: 100%;
           min-height: 100vh;
           display: flex;
           align-items: center;
           justify-content: center;
-          padding: 1rem;
+          padding: 20px;
           box-sizing: border-box;
           overflow: hidden;
-        }
-
-        .kvb-auth-card {
-          display: flex;
-          flex-direction: row;
-          width: 100%;
-          max-width: 1100px;
-          min-height: 600px;
-          background: #ffffff;
-          border-radius: 20px;
-          overflow: hidden;
-          box-shadow: 0 20px 60px rgba(15, 23, 42, 0.25);
           position: relative;
+          z-index: 1;
         }
 
-        .kvb-left,
-        .kvb-right {
-          padding: 2rem;
-          box-sizing: border-box;
-        }
-
-        .kvb-right {
-          position: relative;
-        }
-
-        .kvb-left {
-          flex: 1;
-          min-width: 0;
-          background: linear-gradient(135deg, var(--kvb-green-dark) 0%, var(--kvb-green) 50%, var(--kvb-navy) 100%);
-          color: #ffffff;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-        }
-
-        .kvb-right {
-          flex: 1;
-          min-width: 0;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-        }
-
-        /* Branded service icon colors — KVB palette only (green, gold, navy, red/maroon) */
-        .kvb-service-icon-shield {
-          background: linear-gradient(135deg, var(--kvb-navy), var(--kvb-green-dark)) !important;
-          color: #ffffff !important;
-        }
-        .kvb-service-icon-red-blend {
-          background: linear-gradient(135deg, var(--kvb-red), var(--kvb-red-dark)) !important;
-          color: #ffffff !important;
-        }
-
-        @media (max-width: 1024px) {
-          .kvb-auth-card {
-            flex-direction: column !important;
-            max-width: 100%;
-            min-height: auto;
-          }
-
-          .kvb-left {
-            display: none !important;
-          }
-
-          .kvb-right {
-            padding: 1.5rem;
-          }
-
-          .kvb-back-home,
-          .kvb-date-pill {
-            position: static !important;
-            display: inline-block;
-            width: auto;
-            margin-bottom: 1rem;
-            text-align: left;
-          }
-
-          .kvb-date-pill {
-            margin-top: 0;
-            margin-bottom: 0.75rem;
-          }
-
-          .kvb-pms-blob {
-            display: none !important;
-          }
-        }
-
-        @media (max-width: 768px) {
-          .kvb-auth-shell {
-            padding: 0.5rem;
-          }
-
-          .kvb-auth-card {
-            max-width: 100%;
-            min-height: auto;
-            border-radius: 16px;
-            flex-direction: column;
-          }
-
-          .kvb-left,
-          .kvb-right {
-            padding: 1.5rem;
-          }
-
-          .kvb-logo-pill {
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            gap: 0.75rem;
-            padding: 1.2rem 1rem;
-          }
-
-          .kvb-logo-pill-text-main {
-            font-size: 1rem !important;
-          }
-
-          .kvb-logo-pill-text-sub {
-            font-size: 0.65rem !important;
-          }
-
-          .kvb-left-title {
-            font-size: 1.1rem !important;
-            text-align: center;
-          }
-
-          .kvb-left-sub {
-            font-size: 0.85rem !important;
-            text-align: center;
-          }
-
-          .kvb-services-grid {
-            grid-template-columns: 1fr !important;
-            gap: 1rem !important;
-          }
-
-          .kvb-service-item {
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            gap: 0.75rem;
-          }
-
-          .kvb-left-footer {
-            justify-content: center;
-            gap: 1rem !important;
-            font-size: 0.75rem !important;
-          }
-
-          .kvb-right-title {
-            font-size: 1.25rem !important;
-            text-align: center;
-          }
-
-          .kvb-right-sub {
-            font-size: 0.9rem !important;
-            text-align: center;
-          }
-
-          .kvb-form-body {
-            width: 100%;
-          }
-
-          .kvb-input-wrap input {
-            font-size: 16px !important; /* Prevent iOS zoom on focus */
-          }
-        }
-
-        @media (max-width: 480px) {
-          .kvb-left,
-          .kvb-right {
-            padding: 1rem;
-          }
-
-          .kvb-logo-pill {
-            padding: 1rem 0.75rem;
-          }
-
-          .kvb-back-home,
-          .kvb-date-pill {
-            position: static !important;
-            text-align: left;
-          }
-
-          .kvb-left-footer span {
-            display: block;
-            text-align: center;
-          }
+        /* Prevent iOS zoom on input focus */
+        .kvb-input-wrap input {
+          font-size: 16px !important;
         }
       `}</style>
       <div className="kvb-auth-shell">
@@ -272,12 +84,12 @@ export default function LoginPage() {
 
               <div className="kvb-services-merged">
                 <div className="kvb-services-title">
-                  <i className="fa fa-shield-alt kvb-service-icon-shield"></i>
+                  <i className="fa fa-shield-alt kvb-service-icon"></i>
                   Inspection Services
                 </div>
                 <div className="kvb-services-grid">
                   <div className="kvb-service-item">
-                    <div className="kvb-service-icon kvb-service-icon-red-blend">
+                    <div className="kvb-service-icon">
                       <i className="fa fa-magnifying-glass-location"></i>
                     </div>
                     <div className="kvb-service-text">
@@ -286,7 +98,7 @@ export default function LoginPage() {
                     </div>
                   </div>
                   <div className="kvb-service-item">
-                    <div className="kvb-service-icon kvb-service-icon-red-blend">
+                    <div className="kvb-service-icon">
                       <i className="fa fa-chart-line"></i>
                     </div>
                     <div className="kvb-service-text">
