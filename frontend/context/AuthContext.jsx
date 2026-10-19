@@ -25,8 +25,20 @@ export function AuthProvider({ children }) {
     gcTime: 10 * 60 * 1000,
   });
 
+  // Ensure the CSRF cookie is established before any state-changing request.
+  // The backend sets csrfToken via attachCsrfToken middleware on every response.
+  async function ensureCsrfToken() {
+    try {
+      await api.get('/csrf-token');
+    } catch (error) {
+      // Non-fatal — the login endpoint is CSRF-exempt, so this is a belt-and-braces step.
+      console.warn('CSRF token preflight failed:', error);
+    }
+  }
+
   const loginMutation = useMutation({
     mutationFn: async ({ username, password }) => {
+      await ensureCsrfToken();
       const res = await api.post('/auth/login', { username, password });
       return res.data;
     },

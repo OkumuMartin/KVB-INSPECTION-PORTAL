@@ -1320,4 +1320,13 @@
   .kvb-footer-copyright {
     font-size: 0.75rem;
   }
+
+  /* Service row: stack to single column on mobile */
+  .kvb-service-row {
+    grid-template-columns: 1fr !important;
+  }
+
+  .kvb-service-card {
+    min-width: auto;
+  }
 }

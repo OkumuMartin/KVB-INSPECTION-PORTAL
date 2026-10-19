@@ -46,6 +46,160 @@ export default function LoginPage() {
         }
         .kvb-logo-pill-text-main { color: #ffffff !important; }
         .kvb-logo-pill-text-sub { color: rgba(255,255,255,0.85) !important; }
+
+        /* ===== Login page responsiveness ===== */
+        .kvb-auth-shell {
+          width: 100%;
+          min-height: 100vh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 1rem;
+          box-sizing: border-box;
+          overflow: hidden;
+        }
+
+        .kvb-auth-card {
+          display: flex;
+          flex-direction: column;
+          width: 100%;
+          max-width: 1100px;
+          min-height: 600px;
+          background: #ffffff;
+          border-radius: 20px;
+          overflow: hidden;
+          box-shadow: 0 20px 60px rgba(15, 23, 42, 0.25);
+          position: relative;
+        }
+
+        .kvb-left,
+        .kvb-right {
+          padding: 2rem;
+          box-sizing: border-box;
+        }
+
+        .kvb-left {
+          flex: 1;
+          min-width: 0;
+          background: linear-gradient(135deg, var(--kvb-green-dark) 0%, var(--kvb-green) 50%, var(--kvb-navy) 100%);
+          color: #ffffff;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+        }
+
+        .kvb-right {
+          flex: 1;
+          min-width: 0;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+        }
+
+        @media (max-width: 768px) {
+          .kvb-auth-shell {
+            padding: 0.5rem;
+          }
+
+          .kvb-auth-card {
+            max-width: 100%;
+            min-height: auto;
+            border-radius: 16px;
+          }
+
+          .kvb-left,
+          .kvb-right {
+            padding: 1.5rem;
+          }
+
+          .kvb-left {
+            order: 2;
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+          }
+
+          .kvb-right {
+            order: 1;
+          }
+
+          .kvb-logo-pill {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 0.75rem;
+            padding: 1.2rem 1rem;
+          }
+
+          .kvb-logo-pill-text-main {
+            font-size: 1rem !important;
+          }
+
+          .kvb-logo-pill-text-sub {
+            font-size: 0.65rem !important;
+          }
+
+          .kvb-left-title {
+            font-size: 1.1rem !important;
+            text-align: center;
+          }
+
+          .kvb-left-sub {
+            font-size: 0.85rem !important;
+            text-align: center;
+          }
+
+          .kvb-services-grid {
+            grid-template-columns: 1fr !important;
+            gap: 1rem !important;
+          }
+
+          .kvb-service-item {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 0.75rem;
+          }
+
+          .kvb-left-footer {
+            justify-content: center;
+            gap: 1rem !important;
+            font-size: 0.75rem !important;
+          }
+
+          .kvb-right-title {
+            font-size: 1.25rem !important;
+            text-align: center;
+          }
+
+          .kvb-right-sub {
+            font-size: 0.9rem !important;
+            text-align: center;
+          }
+
+          .kvb-form-body {
+            width: 100%;
+          }
+
+          .kvb-input-wrap input {
+            font-size: 16px !important; /* Prevent iOS zoom on focus */
+          }
+        }
+
+        @media (max-width: 480px) {
+          .kvb-left,
+          .kvb-right {
+            padding: 1rem;
+          }
+
+          .kvb-logo-pill {
+            padding: 1rem 0.75rem;
+          }
+
+          .kvb-left-footer span {
+            display: block;
+            text-align: center;
+          }
+        }
       `}</style>
       <div className="kvb-auth-shell">
       <div className="kvb-pms-blob kvb-pms-blob-1"></div>

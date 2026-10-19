@@ -4,14 +4,19 @@ const crypto = require('crypto');
 const PROTECTED_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 
 // Endpoints exempt from CSRF (auth endpoints issue the token)
-const EXEMPT_PATHS = new Set([
+// Use startsWith so trailing slashes or additional segments still match.
+const EXEMPT_PATH_PREFIXES = [
   '/api/auth/login',
   '/api/auth/register',
   '/api/auth/forgot-password',
   '/api/auth/reset-password',
   '/api/auth/logout',
   '/api/csrf-token',
-]);
+];
+
+function isExemptPath(path) {
+  return EXEMPT_PATH_PREFIXES.some((prefix) => path === prefix || path.startsWith(prefix + '/') || path.startsWith(prefix + '?'));
+}
 
 function generateCsrfToken() {
   return crypto.randomBytes(32).toString('hex');
@@ -34,7 +39,7 @@ function csrfProtection(req, res, next) {
   }
 
   const path = req.path || req.originalUrl || '';
-  if (EXEMPT_PATHS.has(path)) {
+  if (isExemptPath(path)) {
     return next();
   }
 
