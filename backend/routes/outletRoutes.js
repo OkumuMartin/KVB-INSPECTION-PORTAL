@@ -6,7 +6,7 @@ const outletController = require('../controllers/outletController');
 const router = express.Router();
 // Per AGENTS.md: outlet records are reference data. Only SYSTEM_ADMIN and
 // DIRECTOR may create or update them; inspectors can read.
-const canManageOutlets = requireRole('SYSTEM_ADMIN', 'DIRECTOR');
+const canManageOutlets = requireRole('SYSTEM_ADMIN', 'DIRECTOR', 'INSPECTOR');
 
 router.get('/', requireAuth, outletController.listOutlets);
 router.post('/', requireAuth, canManageOutlets, outletValidator, handleValidationErrors, outletController.createOutlet);

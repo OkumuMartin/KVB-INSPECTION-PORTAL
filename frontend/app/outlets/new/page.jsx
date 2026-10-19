@@ -14,7 +14,7 @@ export default function NewOutletPage() {
   const { user } = useAuth();
   const createMutation = useCreateOutlet();
 
-  if (user?.role !== 'SYSTEM_ADMIN' && user?.role !== 'DIRECTOR') {
+  if (user?.role !== 'SYSTEM_ADMIN' && user?.role !== 'DIRECTOR' && user?.role !== 'INSPECTOR') {
     return (
       <ProtectedRoute>
         <InspectionFormShell breadcrumb="Outlets" title="New Outlet">

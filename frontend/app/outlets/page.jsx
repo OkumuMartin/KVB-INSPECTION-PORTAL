@@ -28,7 +28,7 @@ export default function OutletsPage() {
   const items = data.items || [];
   const total = data.total || 0;
   const totalPages = Math.max(Math.ceil(total / PAGE_SIZE), 1);
-  const canManage = user?.role === 'SYSTEM_ADMIN' || user?.role === 'DIRECTOR';
+  const canManage = user?.role === 'SYSTEM_ADMIN' || user?.role === 'DIRECTOR' || user?.role === 'INSPECTOR';
 
   const deleteMutation = useDeleteOutlet();
   const [deletingId, setDeletingId] = useState(null);

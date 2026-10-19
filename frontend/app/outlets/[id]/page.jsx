@@ -18,7 +18,7 @@ export default function OutletDetailPage({ params }) {
   // with React.use() before its properties can be accessed.
   const { id } = use(params);
   const { outlet, loading, error } = useOutlet(id);
-  const canManage = user?.role === 'SYSTEM_ADMIN' || user?.role === 'DIRECTOR';
+  const canManage = user?.role === 'SYSTEM_ADMIN' || user?.role === 'DIRECTOR' || user?.role === 'INSPECTOR';
 
   const updateMutation = useUpdateOutlet();
   const [editing, setEditing] = useState(false);
