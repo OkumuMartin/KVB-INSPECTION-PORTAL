@@ -1,7 +1,14 @@
 import axios from 'axios';
 
+const rawBaseUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
+// Normalize so baseURL always ends with /api — local dev uses
+// http://localhost:5000/api, production may omit the trailing /api.
+const baseURL = rawBaseUrl.endsWith('/api')
+  ? rawBaseUrl
+  : `${rawBaseUrl.replace(/\/$/, '')}/api`;
+
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || '/api',
+  baseURL,
   withCredentials: true,
   timeout: 30000,
   headers: {

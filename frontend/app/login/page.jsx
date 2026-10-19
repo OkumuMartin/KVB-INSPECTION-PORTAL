@@ -47,7 +47,7 @@ export default function LoginPage() {
         .kvb-logo-pill-text-main { color: #ffffff !important; }
         .kvb-logo-pill-text-sub { color: rgba(255,255,255,0.85) !important; }
 
-        /* ===== Login page responsiveness ===== */
+        /* ===== Login page — two-panel side-by-side design ===== */
         .kvb-auth-shell {
           width: 100%;
           min-height: 100vh;
@@ -61,7 +61,7 @@ export default function LoginPage() {
 
         .kvb-auth-card {
           display: flex;
-          flex-direction: column;
+          flex-direction: row;
           width: 100%;
           max-width: 1100px;
           min-height: 600px;
@@ -96,6 +96,20 @@ export default function LoginPage() {
           justify-content: center;
         }
 
+        /* Branded service icon colors — applied on initial load, no refresh needed */
+        .kvb-service-icon-navy {
+          background: linear-gradient(135deg, var(--kvb-navy), #0b4d32) !important;
+          color: #ffffff !important;
+        }
+        .kvb-service-icon-green {
+          background: linear-gradient(135deg, var(--kvb-green), var(--kvb-green-dark)) !important;
+          color: #ffffff !important;
+        }
+        .kvb-service-icon-gold {
+          background: linear-gradient(135deg, var(--kvb-gold), #92400e) !important;
+          color: #ffffff !important;
+        }
+
         @media (max-width: 768px) {
           .kvb-auth-shell {
             padding: 0.5rem;
@@ -105,21 +119,12 @@ export default function LoginPage() {
             max-width: 100%;
             min-height: auto;
             border-radius: 16px;
+            flex-direction: column;
           }
 
           .kvb-left,
           .kvb-right {
             padding: 1.5rem;
-          }
-
-          .kvb-left {
-            order: 2;
-            padding-top: 1rem;
-            padding-bottom: 1rem;
-          }
-
-          .kvb-right {
-            order: 1;
           }
 
           .kvb-logo-pill {
@@ -227,12 +232,12 @@ export default function LoginPage() {
 
               <div className="kvb-services-merged">
                 <div className="kvb-services-title">
-                  <i className="fa fa-shield-alt"></i>
+                  <i className="fa fa-shield-alt kvb-service-icon-navy"></i>
                   Inspection Services
                 </div>
                 <div className="kvb-services-grid">
                   <div className="kvb-service-item">
-                    <div className="kvb-service-icon">
+                    <div className="kvb-service-icon kvb-service-icon-green">
                       <i className="fa fa-magnifying-glass-location"></i>
                     </div>
                     <div className="kvb-service-text">
@@ -241,7 +246,7 @@ export default function LoginPage() {
                     </div>
                   </div>
                   <div className="kvb-service-item">
-                    <div className="kvb-service-icon">
+                    <div className="kvb-service-icon kvb-service-icon-gold">
                       <i className="fa fa-chart-line"></i>
                     </div>
                     <div className="kvb-service-text">
