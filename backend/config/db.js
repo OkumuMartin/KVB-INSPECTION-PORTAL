@@ -34,6 +34,7 @@ async function startInMemoryMongo(reason) {
 
   mongod = await MongoMemoryServer.create();
   const uri = mongod.getUri();
+  console.log('DEV_IN_MEMORY_MONGODB_URI=' + uri);
   await mongoose.connect(uri, CONNECT_OPTIONS);
   console.log('MongoDB (in-memory) connected successfully.');
   return { connected: true, mode: 'memory', uri };
