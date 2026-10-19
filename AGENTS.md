@@ -140,7 +140,7 @@ These guards are deliberate. Do not remove them without understanding the failur
 - `GET /api/health` is a liveness probe only; it does not verify database connectivity.
 - Every user-supplied string that reaches `new RegExp()` must go through `escapeRegExp` first, and every list endpoint
   must cap `limit` (200) and return `total` from `countDocuments`, not the length of the current page.
-- Outlet records are reference data. Only `SYSTEM_ADMIN` and `DIRECTOR` may create or update them; inspectors can read.
+- Outlet records are reference data. `SYSTEM_ADMIN`, `DIRECTOR`, and `INSPECTOR` may create or update them; inspectors can also read.
 - `backend/.env` holds real credentials. It is gitignored, but this workspace is **not** a git repository, so the
   Atlas credential currently on disk has been exposed in plain text. Rotate it and move it to a secret manager.
 

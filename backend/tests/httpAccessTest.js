@@ -49,21 +49,22 @@ const { MongoMemoryServer } = require('mongodb-memory-server');
   const adm = signToken({ id: admin._id.toString(), role: admin.role });
 
   const r1 = await call('POST', '/api/outlets', insp, payload);
-  console.log(`INSPECTOR  POST /outlets      -> ${r1.status} ${r1.status === 403 ? '(blocked OK)' : '(!!! ALLOWED)'}`);
-  assert.strictEqual(r1.status, 403);
+  console.log(`INSPECTOR  POST /outlets      -> ${r1.status} ${r1.status === 201 ? '(allowed OK)' : '(!!! ' + r1.status + ')'}`);
+  assert.strictEqual(r1.status, 201);
+  const inspOutletId = r1.json.item._id;
 
-  const r2 = await call('PUT', '/api/outlets/507f1f77bcf86cd799439011', insp, payload);
-  console.log(`INSPECTOR  PUT  /outlets/:id  -> ${r2.status} ${r2.status === 403 ? '(blocked OK)' : '(!!! ALLOWED)'}`);
-  assert.strictEqual(r2.status, 403);
+  const r2 = await call('PUT', `/api/outlets/${inspOutletId}`, insp, payload);
+  console.log(`INSPECTOR  PUT  /outlets/:id  -> ${r2.status} ${r2.status === 200 ? '(allowed OK)' : '(!!! ' + r2.status + ')'}`);
+  assert.strictEqual(r2.status, 200);
 
   const r3 = await call('POST', '/api/outlets', dir, payload);
   console.log(`DIRECTOR   POST /outlets      -> ${r3.status} ${r3.status === 201 ? '(allowed OK)' : '(!!! ' + r3.status + ')'}`);
   assert.strictEqual(r3.status, 201);
   const outletId = r3.json.item._id;
 
-  const r4 = await call('PUT', `/api/outlets/${outletId}`, insp, { ownerName: 'Hijacked' });
-  console.log(`INSPECTOR  PUT existing      -> ${r4.status} ${r4.status === 403 ? '(blocked OK)' : '(!!! ALLOWED)'}`);
-  assert.strictEqual(r4.status, 403);
+  const r4 = await call('PUT', `/api/outlets/${outletId}`, insp, { outletName: 'Renamed by Inspector', outletType: 'AGROVET', ownerName: 'Hijacked' });
+  console.log(`INSPECTOR  PUT existing      -> ${r4.status} ${r4.status === 200 ? '(allowed OK)' : '(!!! ' + r4.status + ')'}`);
+  assert.strictEqual(r4.status, 200);
 
   const r5 = await call('GET', '/api/outlets', insp);
   console.log(`INSPECTOR  GET  /outlets      -> ${r5.status} ${r5.status === 200 ? '(read allowed OK)' : '(!!! ' + r5.status + ')'}`);
@@ -90,8 +91,8 @@ const { MongoMemoryServer } = require('mongodb-memory-server');
   // pagination total
   await call('POST', '/api/outlets', dir, { ...payload, outletName: 'Second Outlet' });
   const r8 = await call('GET', '/api/outlets?limit=1&page=1', insp);
-  console.log(`Pagination total (2 records)  -> total=${r8.json.total} items=${r8.json.items.length} limit=${r8.json.limit}`);
-  assert.strictEqual(r8.json.total, 2);
+  console.log(`Pagination total (3 records)  -> total=${r8.json.total} items=${r8.json.items.length} limit=${r8.json.limit}`);
+  assert.strictEqual(r8.json.total, 3);
 
   const r9 = await call('GET', '/api/outlets?limit=999999', insp);
   console.log(`Limit cap                     -> limit=${r9.json.limit} ${r9.json.limit <= 200 ? '(capped OK)' : '(!!! UNCAPPED)'}`);

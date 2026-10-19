@@ -10,10 +10,7 @@
     "test": "node tests/runTests.js",
     "test:integration": "node tests/smokeTest.js",
     "test:access": "node tests/httpAccessTest.js",
-    "test:all": "node tests/runTests.js && node tests/smokeTest.js && node tests/httpAccessTest.js",
-    "import:inspections": "node scripts/importInspections.js",
-    "import:dry-run": "node scripts/importInspections.js --dry-run",
-    "verify:import": "node scripts/verifyImport.js"
+    "test:all": "node tests/runTests.js && node tests/smokeTest.js && node tests/httpAccessTest.js"
   },
   "keywords": [],
   "author": "",
