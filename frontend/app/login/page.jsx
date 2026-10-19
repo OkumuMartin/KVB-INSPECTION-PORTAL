@@ -78,6 +78,10 @@ export default function LoginPage() {
           box-sizing: border-box;
         }
 
+        .kvb-right {
+          position: relative;
+        }
+
         .kvb-left {
           flex: 1;
           min-width: 0;
@@ -96,18 +100,48 @@ export default function LoginPage() {
           justify-content: center;
         }
 
-        /* Branded service icon colors — applied on initial load, no refresh needed */
-        .kvb-service-icon-navy {
-          background: linear-gradient(135deg, var(--kvb-navy), #0b4d32) !important;
+        /* Branded service icon colors — KVB palette only (green, gold, navy, red/maroon) */
+        .kvb-service-icon-shield {
+          background: linear-gradient(135deg, var(--kvb-navy), var(--kvb-green-dark)) !important;
           color: #ffffff !important;
         }
-        .kvb-service-icon-green {
-          background: linear-gradient(135deg, var(--kvb-green), var(--kvb-green-dark)) !important;
+        .kvb-service-icon-red-blend {
+          background: linear-gradient(135deg, var(--kvb-red), var(--kvb-red-dark)) !important;
           color: #ffffff !important;
         }
-        .kvb-service-icon-gold {
-          background: linear-gradient(135deg, var(--kvb-gold), #92400e) !important;
-          color: #ffffff !important;
+
+        @media (max-width: 1024px) {
+          .kvb-auth-card {
+            flex-direction: column !important;
+            max-width: 100%;
+            min-height: auto;
+          }
+
+          .kvb-left {
+            display: none !important;
+          }
+
+          .kvb-right {
+            padding: 1.5rem;
+          }
+
+          .kvb-back-home,
+          .kvb-date-pill {
+            position: static !important;
+            display: inline-block;
+            width: auto;
+            margin-bottom: 1rem;
+            text-align: left;
+          }
+
+          .kvb-date-pill {
+            margin-top: 0;
+            margin-bottom: 0.75rem;
+          }
+
+          .kvb-pms-blob {
+            display: none !important;
+          }
         }
 
         @media (max-width: 768px) {
@@ -200,6 +234,12 @@ export default function LoginPage() {
             padding: 1rem 0.75rem;
           }
 
+          .kvb-back-home,
+          .kvb-date-pill {
+            position: static !important;
+            text-align: left;
+          }
+
           .kvb-left-footer span {
             display: block;
             text-align: center;
@@ -232,12 +272,12 @@ export default function LoginPage() {
 
               <div className="kvb-services-merged">
                 <div className="kvb-services-title">
-                  <i className="fa fa-shield-alt kvb-service-icon-navy"></i>
+                  <i className="fa fa-shield-alt kvb-service-icon-shield"></i>
                   Inspection Services
                 </div>
                 <div className="kvb-services-grid">
                   <div className="kvb-service-item">
-                    <div className="kvb-service-icon kvb-service-icon-green">
+                    <div className="kvb-service-icon kvb-service-icon-red-blend">
                       <i className="fa fa-magnifying-glass-location"></i>
                     </div>
                     <div className="kvb-service-text">
@@ -246,7 +286,7 @@ export default function LoginPage() {
                     </div>
                   </div>
                   <div className="kvb-service-item">
-                    <div className="kvb-service-icon kvb-service-icon-gold">
+                    <div className="kvb-service-icon kvb-service-icon-red-blend">
                       <i className="fa fa-chart-line"></i>
                     </div>
                     <div className="kvb-service-text">

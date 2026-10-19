@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import api from '../lib/api';
+import api, { setCsrfToken } from '../lib/api';
 
 const AuthContext = createContext(null);
 
@@ -29,7 +29,8 @@ export function AuthProvider({ children }) {
   // The backend sets csrfToken via attachCsrfToken middleware on every response.
   async function ensureCsrfToken() {
     try {
-      await api.get('/csrf-token');
+      const res = await api.get('/csrf-token');
+      setCsrfToken(res.data.csrfToken ?? null);
     } catch (error) {
       // Non-fatal — the login endpoint is CSRF-exempt, so this is a belt-and-braces step.
       console.warn('CSRF token preflight failed:', error);

@@ -16,14 +16,20 @@ const api = axios.create({
   },
 });
 
-// The CSRF token lives in an httpOnly cookie set by attachCsrfToken on every
-// response. Reading it from the cookie (not a body field) guarantees the
-// header token always matches the cookie token — otherwise state-changing
-// requests fail with 403 "CSRF token mismatch".
-function readCsrfCookie(): string | null {
-  if (typeof document === 'undefined') return null;
-  const match = document.cookie.match(/(?:^|;\s*)csrfToken=([^;]+)/);
-  return match ? decodeURIComponent(match[1]) : null;
+// The CSRF token lives in a cookie set by attachCsrfToken on every backend
+// response. Because the frontend and backend are cross-site (Vercel vs
+// Render), document.cookie on the frontend page never reflects the
+// backend's csrfToken cookie. Instead we capture the token from the JSON
+// body of GET /csrf-token and hold it in this module-level variable so the
+// request interceptor can echo it back in the x-csrf-token header.
+let csrfToken: string | null = null;
+
+export function setCsrfToken(token: string | null) {
+  csrfToken = token;
+}
+
+export function getCsrfToken(): string | null {
+  return csrfToken;
 }
 
 // Request interceptor: attach CSRF token to state-changing requests
@@ -31,7 +37,7 @@ api.interceptors.request.use(
   (config) => {
     const method = (config.method || 'get').toLowerCase();
     if (['post', 'put', 'patch', 'delete'].includes(method)) {
-      const token = readCsrfCookie();
+      const token = csrfToken;
       if (token) {
         config.headers['x-csrf-token'] = token;
       }
@@ -43,7 +49,14 @@ api.interceptors.request.use(
 
 // Response interceptor: capture new CSRF tokens from auth responses
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Some endpoints may echo the CSRF token back in the body; refresh our
+    // copy so subsequent state-changing requests stay in sync.
+    if (response.data && typeof response.data.csrfToken === 'string') {
+      csrfToken = response.data.csrfToken;
+    }
+    return response;
+  },
   (error) => {
     // On 401, redirect to login
     if (error.response && error.response.status === 401) {
