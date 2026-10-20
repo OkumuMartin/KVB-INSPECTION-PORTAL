@@ -6,6 +6,7 @@ import ProtectedRoute from '../../components/ProtectedRoute';
 import { useInspections } from '../../hooks/useInspections';
 import StatusBadge from '../../components/StatusBadge';
 import { toDateInputValue } from '../../lib/inspectionForm';
+import { backendUrl } from '../../lib/api';
 import '../../styles/InspectionForm.css';
 
 export default function ReportsPage() {
@@ -21,7 +22,7 @@ export default function ReportsPage() {
       return;
     }
     const qs = new URLSearchParams({ format, ids: ids.join(',') });
-    window.open(`/api/inspections/export?${qs}`, '_blank', 'noopener,noreferrer');
+    window.open(backendUrl(`/api/inspections/export?${qs}`), '_blank', 'noopener,noreferrer');
   };
 
   return (

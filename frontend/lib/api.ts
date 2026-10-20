@@ -16,6 +16,32 @@ const api = axios.create({
   },
 });
 
+/**
+ * Resolve the absolute backend origin (no trailing /api).
+ *
+ * `window.open` navigations cannot carry the module-scoped CSRF token, so
+ * the export endpoints rely entirely on the browser attaching the httpOnly
+ * JWT cookie. A relative URL resolves against the frontend origin (Next.js
+ * in production), the cookie is never sent, and the download 401s. An
+ * absolute backend URL makes the cookie travel to Express.
+ */
+export function getBackendOrigin() {
+  if (rawBaseUrl.startsWith('http')) {
+    return rawBaseUrl.replace(/\/api$/, '').replace(/\/$/, '');
+  }
+  if (typeof window !== 'undefined') {
+    return window.location.origin;
+  }
+  return '';
+}
+
+/** Build an absolute backend URL for a path that starts with /api. */
+export function backendUrl(path: string) {
+  const origin = getBackendOrigin();
+  if (!origin) return path;
+  return `${origin}${path}`;
+}
+
 // The CSRF token lives in a cookie set by attachCsrfToken on every backend
 // response. Because the frontend and backend are cross-site (Vercel vs
 // Render), document.cookie on the frontend page never reflects the

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import api from '../../../lib/api';
+import api, { backendUrl } from '../../../lib/api';
 import ProtectedRoute from '../../../components/ProtectedRoute';
 import { useAuth } from '../../../context/AuthContext';
 import { useInspectionForm } from '../../../hooks/useInspectionForm';
@@ -153,7 +153,7 @@ export default function InspectionDetailPage() {
   }, [steps, formData, outletId, inspectionDate, findingSections, setErrors, goToStep, mode, saveMutation, submitMutation, id, loadInspection, user]);
 
   const handleExport = useCallback(() => {
-    const url = `${api.defaults.baseURL}/inspections/${id}/export?format=${exportFormat}`;
+    const url = backendUrl(`/api/inspections/${id}/export?format=${exportFormat}`);
     window.open(url, '_blank', 'noopener,noreferrer');
   }, [id, exportFormat]);
 

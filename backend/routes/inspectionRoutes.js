@@ -38,6 +38,10 @@ const auditLogQueryValidator = [
 router.get('/', requireAuth, inspectionListValidator, handleValidationErrors, listInspections);
 router.get('/search', requireAuth, inspectionListValidator, handleValidationErrors, listInspections);
 
+// Static routes must precede `/:id` — Express matches in registration order,
+// otherwise `/export` is captured as an ID and validateObjectId() 400s it.
+router.get('/export', requireAuth, handleValidationErrors, exportReports);
+
 router.post(
   '/',
   requireAuth,
@@ -51,7 +55,6 @@ router.post(
 router.get('/:id', requireAuth, validateObjectId(), handleValidationErrors, getInspection);
 router.get('/:id/pdf', requireAuth, validateObjectId(), handleValidationErrors, generatePdf);
 router.get('/:id/export', requireAuth, validateObjectId(), handleValidationErrors, exportInspection);
-router.get('/export', requireAuth, handleValidationErrors, exportReports);
 router.get('/:id/audit-log', requireAuth, validateObjectId(), auditLogQueryValidator, handleValidationErrors, getInspectionAuditLog);
 router.get('/:id/comments', requireAuth, validateObjectId(), handleValidationErrors, listComments);
 router.post('/:id/comments', requireAuth, validateObjectId(), handleValidationErrors, addComment);
