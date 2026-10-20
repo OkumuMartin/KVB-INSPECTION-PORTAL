@@ -92,10 +92,11 @@ export function AuthProvider({ children }) {
   };
 
   const logout = async () => {
+    // Clear local state immediately for responsive sign-out; server call is best-effort.
+    queryClient.setQueryData(['auth', 'me'], null);
     try {
       await logoutMutation.mutateAsync();
     } catch (error) {
-      // Local sign-out must still complete even if the server request fails.
       console.error('Logout request failed:', error);
     }
   };
