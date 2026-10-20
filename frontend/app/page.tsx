@@ -1,4 +1,4 @@
-ï»¿'use client';
+'use client';
 
 import * as React from 'react';
 import { useState, useEffect } from 'react';
@@ -159,7 +159,7 @@ function WorkflowStep({ number, title, desc }: { number: string; title: string; 
  */
 function ServiceCard({ service, index = 0 }: { service: BoardService; index?: number }) {
   const action = service.external ? (
-    <a href={service.link} className="kvb-service-button" target="_blank" rel="noopener noreferrer">
+    <a href={service.link} className="kvb-service-button" rel="noopener noreferrer">
       <span>{service.cta}</span>
       <i className="fa fa-arrow-right"></i>
     </a>
@@ -314,10 +314,10 @@ export default function LandingPage() {
                     </div>
                     <div className="lp-demo-body">
                       <div className="lp-demo-title">Inspection #VIP-2026-0042</div>
-                      <p>Pep Stores Ltd â€” Nairobi</p>
+                      <p>Pep Stores Ltd — Nairobi</p>
                       <div className="lp-demo-progress">
-                        <span className="lp-progress-step lp-progress-complete">âœ“</span>
-                        <span className="lp-progress-step lp-progress-complete">âœ“</span>
+                        <span className="lp-progress-step lp-progress-complete">?</span>
+                        <span className="lp-progress-step lp-progress-complete">?</span>
                         <span className="lp-progress-step lp-progress-active">1</span>
                         <span className="lp-progress-step">2</span>
                       </div>
@@ -339,12 +339,12 @@ export default function LandingPage() {
                 <div className="kvb-ticker-items">
                   {noticeItems.map((item) => (
                     <span key={item.text}>
-                      <a href={item.link} target="_blank" rel="noopener noreferrer">{item.text}</a>
+                      <a href={item.link} rel="noopener noreferrer">{item.text}</a>
                     </span>
                   ))}
                   {noticeItems.map((item) => (
                     <span key={item.text + '-dup'}>
-                      <a href={item.link} target="_blank" rel="noopener noreferrer">{item.text}</a>
+                      <a href={item.link} rel="noopener noreferrer">{item.text}</a>
                     </span>
                   ))}
                 </div>
@@ -391,7 +391,7 @@ export default function LandingPage() {
                 </p>
                 <p className="kvb-about-sub">
                   Through its Inspection Portal, KVB monitors veterinary input outlets across all 47 counties, ensuring products
-                  meet safety standards, prescriptions are maintained, and regulatory compliance is upheld â€” protecting animal and
+                  meet safety standards, prescriptions are maintained, and regulatory compliance is upheld — protecting animal and
                   public health through rigorous on-site assessments and digital reporting.
                 </p>
               </div>
@@ -410,7 +410,7 @@ export default function LandingPage() {
                 <blockquote className="kvb-mandate-text">
                   To exercise general supervision and control over the training, business, practice
                   and employment of veterinary surgeons and veterinary paraprofessionals in Kenya.
-                  <cite> â€” Veterinary Surgeons' and Veterinary Para-professionals Act No. 29 of 2011</cite>
+                  <cite> — Veterinary Surgeons' and Veterinary Para-professionals Act No. 29 of 2011</cite>
                 </blockquote>
                 <div className="kvb-tags">
                   <span className="kvb-tag">Licensed Outlets</span>
@@ -526,13 +526,13 @@ export default function LandingPage() {
                       </div>
                     </div>
                     <div className="kvb-footer-tagline">
-                      Veterinary Inspection Portal â€” a digital gateway for managing veterinary inputs outlet inspections across Kenya.
+                      Veterinary Inspection Portal — a digital gateway for managing veterinary inputs outlet inspections across Kenya.
                     </div>
                     <div className="kvb-footer-contact">
                       <span><i className="fa fa-phone"></i> Tel: +254-722 305 253</span>
                       <span><i className="fa fa-mobile-alt"></i> +254-701 581 718</span>
                       <span><i className="fa fa-envelope"></i> info@kenyavetboard.or.ke</span>
-                      <span><i className="fa fa-map-marker-alt"></i> P.O. Box 513 â€“ 00605, Uthiru, Nairobi</span>
+                      <span><i className="fa fa-map-marker-alt"></i> P.O. Box 513 – 00605, Uthiru, Nairobi</span>
                     </div>
                   </div>
                 </div>
@@ -542,9 +542,9 @@ export default function LandingPage() {
                     <strong>Quick Links</strong>
                     <ul>
                       <li><Link href="/">Home</Link></li>
-                      <li><a href={KVB_PMS_LOGIN} target="_blank" rel="noopener noreferrer">KVB PMS</a></li>
+                      <li><a href={KVB_PMS_LOGIN} rel="noopener noreferrer">KVB PMS</a></li>
                       <li><Link href="/login">Inspection Portal</Link></li>
-                      <li><a href={KVB_MAIN_SITE} target="_blank" rel="noopener noreferrer">Notices</a></li>
+                      <li><a href={KVB_MAIN_SITE} rel="noopener noreferrer">Notices</a></li>
                     </ul>
                   </div>
                 </div>
@@ -565,10 +565,10 @@ export default function LandingPage() {
                   <div className="kvb-footer-col">
                     <strong>Support</strong>
                     <ul>
-                      <li><a href="https://kenyavetboard.or.ke/en/contact" target="_blank" rel="noopener noreferrer">Make an Enquiry</a></li>
-                      <li><a href="https://kenyavetboard.or.ke/en/contact" target="_blank" rel="noopener noreferrer">File a Complaint</a></li>
-                      <li><a href="https://kenyavetboard.or.ke/en/contact" target="_blank" rel="noopener noreferrer">Contact Us</a></li>
-                      <li><a href="https://kenyavetboard.or.ke/en/faq" target="_blank" rel="noopener noreferrer">FAQ</a></li>
+                      <li><a href="https://kenyavetboard.or.ke/en/contact" rel="noopener noreferrer">Make an Enquiry</a></li>
+                      <li><a href="https://kenyavetboard.or.ke/en/contact" rel="noopener noreferrer">File a Complaint</a></li>
+                      <li><a href="https://kenyavetboard.or.ke/en/contact" rel="noopener noreferrer">Contact Us</a></li>
+                      <li><a href="https://kenyavetboard.or.ke/en/faq" rel="noopener noreferrer">FAQ</a></li>
                     </ul>
                   </div>
                 </div>

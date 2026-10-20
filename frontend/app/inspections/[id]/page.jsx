@@ -153,9 +153,17 @@ export default function InspectionDetailPage() {
   }, [steps, formData, outletId, inspectionDate, findingSections, setErrors, goToStep, mode, saveMutation, submitMutation, id, loadInspection, user]);
 
   const handleExport = useCallback(() => {
-    const url = backendUrl(`/api/inspections/${id}/export?format=${exportFormat}`);
-    window.open(url, '_blank', 'noopener,noreferrer');
-  }, [id, exportFormat]);
+    for (const format of ['pdf', 'word', 'excel']) {
+      const url = backendUrl(`/api/inspections/${id}/export?format=${format}`);
+      const link = document.createElement('a');
+      link.href = url;
+      link.rel = 'noopener noreferrer';
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  }, [id]);
 
   const formatOptions = [
     { value: 'pdf', label: 'PDF', icon: 'fa-file-pdf' },
