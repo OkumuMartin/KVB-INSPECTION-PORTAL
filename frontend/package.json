@@ -9,6 +9,7 @@
     "start": "next start -p 5173",
     "lint": "eslint . --ext js,jsx,ts,tsx",
     "type-check": "tsc --noEmit",
+    "test": "node --test \"tests/**/*.test.js\"",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "clean": "next telemetry disable && rm -rf .next"

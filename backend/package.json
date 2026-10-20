@@ -10,6 +10,8 @@
     "test": "node tests/runTests.js",
     "test:integration": "node tests/smokeTest.js",
     "test:access": "node tests/httpAccessTest.js",
+    "test:live": "node tests/liveVerification.js",
+    "test:live:local": "node tests/liveVerificationHarness.js",
     "test:all": "node tests/runTests.js && node tests/smokeTest.js && node tests/httpAccessTest.js"
   },
   "keywords": [],

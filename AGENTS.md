@@ -94,6 +94,8 @@ npm run seed         # Seed database with demo users
 npm test             # Run unit/security/workflow tests
 npm run test:integration  # End-to-end test on in-memory MongoDB
 npm run test:access  # HTTP-level authorization and ReDoS tests
+npm run test:live    # Verification against the real Atlas cluster
+npm run test:live:local  # Same suite against a throwaway in-memory MongoDB
 npm run test:all     # All three suites
 
 # Frontend
@@ -103,6 +105,7 @@ npm run dev          # Next.js dev server (http://localhost:5173)
 npm run build        # Production build
 npm run lint         # ESLint
 npm run type-check   # TypeScript type checking
+npm test             # Unit tests (node:test, no test framework dependency)
 npm run format       # Prettier formatting
 ```
 
@@ -141,8 +144,25 @@ These guards are deliberate. Do not remove them without understanding the failur
 - Every user-supplied string that reaches `new RegExp()` must go through `escapeRegExp` first, and every list endpoint
   must cap `limit` (200) and return `total` from `countDocuments`, not the length of the current page.
 - Outlet records are reference data. `SYSTEM_ADMIN`, `DIRECTOR`, and `INSPECTOR` may create or update them; inspectors can also read.
-- `backend/.env` holds real credentials. It is gitignored, but this workspace is **not** a git repository, so the
-  Atlas credential currently on disk has been exposed in plain text. Rotate it and move it to a secret manager.
+- `backend/.env` holds real credentials. It is gitignored, so the Atlas credential on disk is not in version control, but it
+  has been readable in plain text in this workspace. Rotate it and move it to a secret manager.
+
+## Live Database Verification
+
+- `npm run test:live` runs `backend/tests/liveVerification.js` against the real Atlas cluster. It never falls back to the
+  in-memory database — it exists to confirm the production data set matches the current models.
+- The suite requires this machine's public IP to be in the Atlas **Network Access** list. When the connection is refused
+  it prints the IP to whitelist and the Atlas console path. The IP is dynamic on this network, so a single allow-list
+  entry will eventually need updating.
+- It is read-mostly. The only writes are a probe outlet, probe user, and probe inspection that are deleted again
+  afterwards, plus `createIndexes()` calls. `createIndexes()` is additive and safe; `syncIndexes()` is never used because
+  it drops indexes the schema does not declare.
+- Checks cover: collection presence, unique indexes (`users.email`, `users.username`, `inspections.inspectionNumber`),
+  search indexes, the sequential inspection-number counter, absence of legacy `attendant1`/`attendant2` fields, finding
+  statuses still matching `inspectionFormConfig`, telephone numbers in canonical form, a GPS coordinate round-trip, and
+  the absence of seeded demo accounts.
+- `npm run test:live:local` runs the same suite against a throwaway `mongodb-memory-server` instance. Use it to prove
+  the suite's own logic before pointing it at production.
 
 ## Inspection Module Notes
 

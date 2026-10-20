@@ -122,7 +122,7 @@ export default function OutletDetailsStep({
       },
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
     );
-  }, [onLocationChange]);
+  }, [applyGpsFix]);
 
   const autoCaptureGps = useCallback(() => {
     if (!navigator.geolocation) return;
