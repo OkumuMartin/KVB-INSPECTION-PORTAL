@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '../../context/AuthContext';
 import { extractError } from '../../lib/errors';
+import ThemeToggle from '../../components/ThemeToggle';
 import { KvbLogoSmall } from '../../components/KvbLogo';
 
 export default function ForgotPasswordPage() {
@@ -67,6 +68,8 @@ export default function ForgotPasswordPage() {
             <Link href="/login" className="kvb-back-home">
               <i className="fa fa-arrow-left"></i> Back to Sign in
             </Link>
+
+            <ThemeToggle className="kvb-auth-theme-toggle" />
 
             <div className="kvb-right-header">
               <div className="kvb-right-title">Forgot Password</div>

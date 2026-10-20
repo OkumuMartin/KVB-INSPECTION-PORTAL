@@ -63,6 +63,42 @@
 
     /* Transitions */
     --transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Landing page surfaces */
+    --lp-surface: linear-gradient(165deg, #e8f0fe 0%, #f8f9fa 45%, #f0f4f8 100%);
+    --lp-surface-card: #ffffff;
+    --lp-surface-card-soft: #f9fafb;
+    --lp-on-surface: #0f172a;
+    --lp-on-surface-muted: #5b6774;
+  }
+
+  /* Dark theme. The attribute is set on <html> before first paint by the
+     inline script in the root layout, and toggled by the header control. */
+  [data-theme='dark'] {
+    --text-main: #e8edf2;
+    --text-muted: #9aa7b4;
+
+    --kvb-card: #121a24;
+    --kvb-border: #263242;
+    --kvb-ivory: #0d141c;
+
+    --shadow-sm: 0 4px 15px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.5);
+    --shadow-lg: 0 30px 80px rgba(0, 0, 0, 0.6);
+
+    --kvb-bg-body:
+      radial-gradient(circle at top left, rgba(26, 123, 50, 0.2) 0%, transparent 55%),
+      radial-gradient(circle at bottom right, rgba(220, 38, 38, 0.12) 0%, transparent 55%),
+      linear-gradient(135deg, #0b1119, #111a24);
+
+    /* Landing page surfaces */
+    --lp-surface: linear-gradient(165deg, #0b1119 0%, #101923 45%, #0d151f 100%);
+    --lp-surface-card: #121a24;
+    --lp-surface-card-soft: #17212d;
+    --lp-on-surface: #e8edf2;
+    --lp-on-surface-muted: #9aa7b4;
+
+    color-scheme: dark;
   }
 
   html {
@@ -697,20 +733,20 @@
 }
 
 .kvb-date-pill {
-  position: absolute;
-  top: 20px;
-  right: 26px;
-  background: #ffffff;
-  padding: 8px 14px;
-  border-radius: 18px;
-  font-size: 0.84rem;
-  font-weight: 600;
-  color: var(--text-muted);
-  border: 1px solid #e5e7eb;
-  box-shadow: var(--shadow-sm);
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
+    position: absolute;
+    top: 20px;
+    right: 26px;
+    background: #ffffff;
+    padding: 8px 14px;
+    border-radius: 18px;
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    border: 1px solid #e5e7eb;
+    box-shadow: var(--shadow-sm);
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
 }
 
 .kvb-right-header {
@@ -1728,4 +1764,163 @@
     grid-template-columns: 1fr 1fr;
     gap: 1.5rem;
   }
+}
+
+/* ===== Auth pages: dark theme ===== */
+
+[data-theme='dark'] .kvb-auth-shell {
+  background: var(--kvb-bg-body);
+}
+
+[data-theme='dark'] .kvb-auth-card {
+  background: rgba(18, 26, 36, 0.96);
+  border-color: var(--kvb-border);
+}
+
+[data-theme='dark'] .kvb-right {
+  background: #0f1720;
+}
+
+[data-theme='dark'] .kvb-form-body {
+  background: var(--lp-surface-card);
+  border-color: var(--kvb-border);
+  box-shadow: var(--shadow-md);
+}
+
+[data-theme='dark'] .kvb-input-wrap input {
+  background: #0b131c;
+  border-color: #2a3543;
+  color: var(--text-main);
+}
+
+[data-theme='dark'] .kvb-input-wrap input::placeholder {
+  color: #64748b;
+}
+
+[data-theme='dark'] .kvb-field-label,
+[data-theme='dark'] .kvb-field-label span,
+[data-theme='dark'] .kvb-right-title,
+[data-theme='dark'] .kvb-form-success h3 {
+  color: var(--text-main);
+}
+
+[data-theme='dark'] .kvb-right-sub,
+[data-theme='dark'] .kvb-support,
+[data-theme='dark'] .kvb-form-success p {
+  color: var(--text-muted);
+}
+
+[data-theme='dark'] .kvb-form-note {
+  background: rgba(26, 123, 50, 0.16);
+  border-color: rgba(26, 123, 50, 0.4);
+  color: #cfe8d6;
+}
+
+[data-theme='dark'] .kvb-form-note-dev {
+  background: rgba(212, 175, 55, 0.14);
+  border-color: rgba(212, 175, 55, 0.45);
+  color: #f0dfae;
+}
+
+[data-theme='dark'] .kvb-btn-outline {
+  background: transparent;
+  border-color: var(--kvb-border);
+  color: var(--text-main);
+}
+
+[data-theme='dark'] .kvb-btn-outline:hover {
+  border-color: var(--kvb-green);
+  background: rgba(26, 123, 50, 0.12);
+}
+
+[data-theme='dark'] .kvb-password-bar {
+  background: #2a3543;
+}
+
+[data-theme='dark'] .kvb-password-checks {
+  color: #8b98a7;
+}
+
+/* Theme control on the authentication panels */
+.kvb-auth-theme-toggle {
+  position: absolute;
+  top: 20px;
+  right: 26px;
+  z-index: 3;
+}
+
+/* The login panel also shows the date pill in the top-right corner. */
+.kvb-auth-card--with-date .kvb-date-pill {
+  right: 104px;
+}
+
+[data-theme='dark'] .kvb-date-pill {
+  background: var(--lp-surface-card);
+  border-color: var(--kvb-border);
+  color: var(--text-muted);
+}
+
+/* ===== Theme toggle (global: header and auth panels) ===== */
+
+.lp-theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0.7rem 0.3rem 0.35rem;
+  border-radius: 999px;
+  border: 1px solid var(--kvb-border);
+  background: var(--lp-surface-card);
+  color: var(--lp-on-surface-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.25s ease, color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.lp-theme-toggle:hover {
+  border-color: var(--kvb-green);
+  color: var(--kvb-green);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.lp-theme-toggle-track {
+  position: relative;
+  width: 34px;
+  height: 18px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--kvb-gold), #b8860b);
+  display: block;
+  flex-shrink: 0;
+  transition: background 0.3s ease;
+}
+
+[data-theme='dark'] .lp-theme-toggle-track {
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+}
+
+.lp-theme-toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #b8860b;
+  display: grid;
+  place-items: center;
+  font-size: 0.55rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s ease;
+}
+
+[data-theme='dark'] .lp-theme-toggle-thumb {
+  transform: translateX(16px);
+  color: #cbd5e1;
+}
+
+.lp-theme-toggle-label {
+  min-width: 2.6rem;
+  text-align: left;
 }

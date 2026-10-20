@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '../../context/AuthContext';
 import { extractError } from '../../lib/errors';
+import ThemeToggle from '../../components/ThemeToggle';
 import { KvbLogoSmall } from '../../components/KvbLogo';
 
 export default function LoginPage() {
@@ -80,7 +81,7 @@ export default function LoginPage() {
       <div className="kvb-pms-blob kvb-pms-blob-2"></div>
       <div className="kvb-pms-blob kvb-pms-blob-3"></div>
 
-      <div className={`kvb-auth-card ${mounted ? 'mounted' : ''}`}>
+      <div className={`kvb-auth-card kvb-auth-card--with-date ${mounted ? 'mounted' : ''}`}>
         {/* LEFT PANEL (PMS style gradient) */}
         <div className="kvb-left">
           <div className="kvb-left-top">
@@ -139,6 +140,8 @@ export default function LoginPage() {
           <Link href="/" className="kvb-back-home">
             <i className="fa fa-arrow-left"></i> Back to Home
           </Link>
+
+          <ThemeToggle className="kvb-auth-theme-toggle" />
 
           <div className="kvb-date-pill">
             <i className="fa fa-calendar-day"></i>

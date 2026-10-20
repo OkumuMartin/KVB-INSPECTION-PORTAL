@@ -5,6 +5,8 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '../context/AuthContext';
 import { KvbLogoSmall } from '../components/KvbLogo';
+import ThemeToggle from '../components/ThemeToggle';
+import { useReveal } from '../hooks/useReveal';
 import '../styles/LandingPage.css';
 
 const trustStats = [
@@ -36,16 +38,61 @@ const securityFeatures = [
 ];
 
 const kvbServices = [
-  { icon: 'fa-clipboard-check', title: 'Registration', desc: 'Veterinary surgeon and paraprofessional registration', link: '#' },
-  { icon: 'fa-file-invoice', title: 'Licensing', desc: 'Professional licence applications and renewals', link: '#' },
-  { icon: 'fa-chart-bar', title: 'Inspection', desc: 'Outlet inspection and compliance monitoring', link: '#services' },
-  { icon: 'fa-book', title: 'Education', desc: 'Veterinary education standards and accreditation', link: '#' },
-  { icon: 'fa-download', title: 'Downloads', desc: 'Forms, guidelines and publications', link: '#' },
-  { icon: 'fa-envelope', title: 'Enquiries', desc: 'Contact us and file complaints', link: '#contact' },
+  {
+    icon: 'fa-clipboard-check',
+    title: 'Registration',
+    desc: 'Veterinary surgeon and paraprofessional registration',
+    detail:
+      'Register veterinary surgeons and veterinary paraprofessionals with the Board, maintain professional records, and keep every credential current and verifiable.',
+    link: '#',
+    cta: 'Start a registration',
+  },
+  {
+    icon: 'fa-file-invoice',
+    title: 'Licensing',
+    desc: 'Professional licence applications and renewals',
+    detail:
+      'Apply for and renew professional licences through a single workflow, with clear status tracking at every stage of the approval cycle.',
+    link: '#',
+    cta: 'Manage licences',
+  },
+  {
+    icon: 'fa-chart-bar',
+    title: 'Inspection',
+    desc: 'Outlet inspection and compliance monitoring',
+    detail:
+      'Conduct on-site inspections of veterinary inputs outlets, record findings against the KVB questionnaire, and track compliance to final certification.',
+    link: '#services',
+    cta: 'Open the portal',
+  },
+  {
+    icon: 'fa-book',
+    title: 'Education',
+    desc: 'Veterinary education standards and accreditation',
+    detail:
+      'Access the standards and accreditation guidance that underpin veterinary training in Kenya, from continuing education to internship programme rules.',
+    link: '#',
+    cta: 'View the standards',
+  },
+  {
+    icon: 'fa-download',
+    title: 'Downloads',
+    desc: 'Forms, guidelines and publications',
+    detail:
+      'Download the official inspection forms, practice guidelines, and Board publications used across the profession.',
+    link: '#',
+    cta: 'Browse downloads',
+  },
+  {
+    icon: 'fa-envelope',
+    title: 'Enquiries',
+    desc: 'Contact us and file complaints',
+    detail:
+      'Reach the Board for enquiries, complaints and service requests, and follow the status of everything you raise with us.',
+    link: '#contact',
+    cta: 'Make an enquiry',
+  },
 ];
-
-const kvbServicesRow1 = kvbServices.slice(0, 3);
-const kvbServicesRow2 = kvbServices.slice(3, 6);
 
 const noticeItems = [
   { text: 'Tender Notice - Site Visit', link: '#' },
@@ -68,9 +115,9 @@ function LogoPill() {
   );
 }
 
-function FeatureCard({ icon, title, desc, iconClass }: { icon?: React.ReactNode; title: string; desc: string; iconClass?: string }) {
+function FeatureCard({ icon, title, desc, iconClass, index = 0 }: { icon?: React.ReactNode; title: string; desc: string; iconClass?: string; index?: number }) {
   return (
-    <div className="kvb-feature-card">
+    <div className="kvb-feature-card" style={{ transitionDelay: `${index * 70}ms` }}>
       <div className={`kvb-feature-icon ${iconClass}`}>{icon}</div>
       <h3>{title}</h3>
       <p>{desc}</p>
@@ -90,11 +137,22 @@ function WorkflowStep({ number, title, desc }: { number: string; title: string; 
   );
 }
 
+/** A section that fades and lifts into place the first time it is scrolled to. */
+function RevealSection({ children, className = '' }: { children: React.ReactNode; className?: string }) {
+  const { ref, visible } = useReveal();
+  return (
+    <div ref={ref} className={`lp-reveal ${visible ? 'is-visible' : ''} ${className}`}>
+      {children}
+    </div>
+  );
+}
+
 export default function LandingPage() {
   const { user } = useAuth();
   const [mounted] = useState(true);
   const [scrolled, setScrolled] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [activeService, setActiveService] = useState(2);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -108,6 +166,8 @@ export default function LandingPage() {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  const currentService = kvbServices[activeService];
 
   return (
     <>
@@ -138,6 +198,7 @@ export default function LandingPage() {
             <a href="#features">Features</a>
             <a href="#workflow">Workflow</a>
             <a href="#contact">Contact</a>
+            <ThemeToggle />
             {user ? (
               <Link href="/dashboard" className="btn btn-secondary lp-signin-btn">
                 <i className="fa fa-tachometer-alt"></i> Dashboard
@@ -235,160 +296,210 @@ export default function LandingPage() {
 
           <section id="services" className="lp-services">
             <div className="lp-container">
-              <div className="kvb-section-header">
-                <p className="kvb-eyebrow">Our Services</p>
-                <h2 className="kvb-section-title">Veterinary Regulatory Services</h2>
-                <p className="kvb-section-sub">
-                  The Kenya Veterinary Board provides a comprehensive range of services to uphold veterinary
-                  standards and ensure quality across the veterinary profession in Kenya.
-                </p>
-              </div>
+              <RevealSection>
+                <div className="kvb-section-header">
+                  <p className="kvb-eyebrow">Our Services</p>
+                  <h2 className="kvb-section-title">Veterinary Regulatory Services</h2>
+                  <p className="kvb-section-sub">
+                    The Kenya Veterinary Board provides a comprehensive range of services to uphold veterinary
+                    standards and ensure quality across the veterinary profession in Kenya.
+                  </p>
+                </div>
+              </RevealSection>
 
-            <div className="kvb-service-grid">
-              <div className="kvb-service-row">
-                {kvbServicesRow1.map((service) => (
-                  <div key={service.title} className="kvb-service-card">
-                    <div className="kvb-landing-service-icon">
-                      <i className={`fa ${service.icon}`}></i>
-                    </div>
-                    <h3>{service.title}</h3>
-                    <p>{service.desc}</p>
+              <RevealSection>
+                <div className="kvb-service-tabs">
+                  <div className="kvb-service-tablist" role="tablist" aria-label="Board services">
+                    {kvbServices.map((service, index) => (
+                      <button
+                        key={service.title}
+                        type="button"
+                        role="tab"
+                        id={`kvb-service-tab-${index}`}
+                        aria-selected={activeService === index}
+                        aria-controls={`kvb-service-panel-${index}`}
+                        tabIndex={activeService === index ? 0 : -1}
+                        className={`kvb-service-tab ${activeService === index ? 'is-active' : ''}`}
+                        onClick={() => setActiveService(index)}
+                        onKeyDown={(event) => {
+                          if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return;
+                          event.preventDefault();
+                          const delta = event.key === 'ArrowRight' ? 1 : -1;
+                          const next = (activeService + delta + kvbServices.length) % kvbServices.length;
+                          setActiveService(next);
+                          document.getElementById(`kvb-service-tab-${next}`)?.focus();
+                        }}
+                      >
+                        <span className="kvb-service-tab-icon">
+                          <i className={`fa ${service.icon}`}></i>
+                        </span>
+                        <span className="kvb-service-tab-text">
+                          <strong>{service.title}</strong>
+                          <small>{service.desc}</small>
+                        </span>
+                      </button>
+                    ))}
                   </div>
-                ))}
-              </div>
-              <div className="kvb-service-row">
-                {kvbServicesRow2.map((service) => (
-                  <div key={service.title} className="kvb-service-card">
-                    <div className="kvb-landing-service-icon">
-                      <i className={`fa ${service.icon}`}></i>
+
+                  <div
+                    className="kvb-service-panel"
+                    role="tabpanel"
+                    id={`kvb-service-panel-${activeService}`}
+                    aria-labelledby={`kvb-service-tab-${activeService}`}
+                    key={activeService}
+                  >
+                    <div className="kvb-service-panel-icon">
+                      <i className={`fa ${currentService.icon}`}></i>
                     </div>
-                    <h3>{service.title}</h3>
-                    <p>{service.desc}</p>
+                    <div className="kvb-service-panel-body">
+                      <h3>{currentService.title}</h3>
+                      <p>{currentService.detail}</p>
+                      <a href={currentService.link} className="btn btn-primary lp-btn-sm">
+                        {currentService.cta}
+                        <i className="fa fa-arrow-right"></i>
+                      </a>
+                    </div>
                   </div>
-                ))}
-              </div>
+                </div>
+              </RevealSection>
             </div>
-          </div>
-        </section>
+          </section>
 
         <section id="inspection" className="lp-about">
           <div className="lp-container">
-            <div className="kvb-about-card">
-              <div className="kvb-about-badge">
-                <i className="fa fa-gavel"></i> About KVB
+            <RevealSection>
+              <div className="kvb-about-card">
+                <div className="kvb-about-badge">
+                  <i className="fa fa-gavel"></i> About KVB
+                </div>
+                 <h2 className="kvb-section-title">Regulatory Oversight of Veterinary Inputs</h2>
+                <p className="kvb-about-text">
+                  The Kenya Veterinary Board exercises statutory supervision over the training, business,
+                  practice and employment of veterinary surgeons and veterinary paraprofessionals in Kenya,
+                  as mandated by the Veterinary Surgeons' and Veterinary Para-professionals Act No. 29 of 2011.
+                </p>
+                <p className="kvb-about-sub">
+                  Through its Inspection Portal, KVB monitors veterinary input outlets across all 47 counties, ensuring products
+                  meet safety standards, prescriptions are maintained, and regulatory compliance is upheld — protecting animal and
+                  public health through rigorous on-site assessments and digital reporting.
+                </p>
               </div>
-               <h2 className="kvb-section-title">Regulatory Oversight of Veterinary Inputs</h2>
-              <p className="kvb-about-text">
-                The Kenya Veterinary Board exercises statutory supervision over the training, business,
-                practice and employment of veterinary surgeons and veterinary paraprofessionals in Kenya,
-                as mandated by the Veterinary Surgeons' and Veterinary Para-professionals Act No. 29 of 2011.
-              </p>
-              <p className="kvb-about-sub">
-                Through its Inspection Portal, KVB monitors veterinary input outlets across all 47 counties, ensuring products
-                meet safety standards, prescriptions are maintained, and regulatory compliance is upheld — protecting animal and
-                public health through rigorous on-site assessments and digital reporting.
-              </p>
-            </div>
+            </RevealSection>
           </div>
         </section>
 
         <section className="lp-mandate">
           <div className="lp-container">
-            <div className="kvb-mandate-card">
-              <div className="kvb-mandate-header">
-                <div className="kvb-badge">Board Charter</div>
-                 <h2 className="kvb-section-title">Our Mandate</h2>
+            <RevealSection>
+              <div className="kvb-mandate-card">
+                <div className="kvb-mandate-header">
+                  <div className="kvb-badge">Board Charter</div>
+                   <h2 className="kvb-section-title">Our Mandate</h2>
+                </div>
+                <blockquote className="kvb-mandate-text">
+                  To exercise general supervision and control over the training, business, practice
+                  and employment of veterinary surgeons and veterinary paraprofessionals in Kenya.
+                  <cite> — Veterinary Surgeons' and Veterinary Para-professionals Act No. 29 of 2011</cite>
+                </blockquote>
+                <div className="kvb-tags">
+                  <span className="kvb-tag">Licensed Outlets</span>
+                  <span className="kvb-tag">National Reach</span>
+                  <span className="kvb-tag">Full Traceability</span>
+                  <span className="kvb-tag">Regulatory Excellence</span>
+                </div>
               </div>
-              <blockquote className="kvb-mandate-text">
-                To exercise general supervision and control over the training, business, practice
-                and employment of veterinary surgeons and veterinary paraprofessionals in Kenya.
-                <cite> — Veterinary Surgeons' and Veterinary Para-professionals Act No. 29 of 2011</cite>
-              </blockquote>
-              <div className="kvb-tags">
-                <span className="kvb-tag">Licensed Outlets</span>
-                <span className="kvb-tag">National Reach</span>
-                <span className="kvb-tag">Full Traceability</span>
-                <span className="kvb-tag">Regulatory Excellence</span>
-              </div>
-            </div>
+            </RevealSection>
           </div>
         </section>
 
 <section id="features" className="lp-features">
             <div className="lp-container">
-              <div className="kvb-section-header">
-                <p className="kvb-eyebrow">Platform Features</p>
-                <h2 className="kvb-section-title">Built for regulatory excellence</h2>
-                <p className="kvb-section-sub">
-                  Designed to meet the rigorous standards of the Kenya Veterinary Board's inspection mandate,
-                  ensuring compliance, traceability, and efficiency across every stage of the inspection lifecycle.
-                </p>
-              </div>
+              <RevealSection>
+                <div className="kvb-section-header">
+                  <p className="kvb-eyebrow">Platform Features</p>
+                  <h2 className="kvb-section-title">Built for regulatory excellence</h2>
+                  <p className="kvb-section-sub">
+                    Designed to meet the rigorous standards of the Kenya Veterinary Board's inspection mandate,
+                    ensuring compliance, traceability, and efficiency across every stage of the inspection lifecycle.
+                  </p>
+                </div>
+              </RevealSection>
 
-            <div className="kvb-feature-grid">
-              {services.map((f) => (
-                <FeatureCard
-                  key={f.title}
-                  icon={<i className={`fa ${f.icon}`}></i>}
-                  title={f.title}
-                  desc={f.desc}
-                  iconClass={f.iconClass || 'lp-fi-green'}
-                />
-              ))}
+              <RevealSection>
+                <div className="kvb-feature-grid">
+                  {services.map((f, index) => (
+                    <FeatureCard
+                      key={f.title}
+                      icon={<i className={`fa ${f.icon}`}></i>}
+                      title={f.title}
+                      desc={f.desc}
+                      iconClass={f.iconClass || 'lp-fi-green'}
+                      index={index}
+                    />
+                  ))}
+                </div>
+              </RevealSection>
             </div>
-          </div>
-        </section>
+          </section>
 
 <section id="workflow" className="lp-workflow-section">
             <div className="lp-container">
-              <div className="kvb-section-header">
-                <p className="kvb-eyebrow">Inspection Lifecycle</p>
-                <h2 className="kvb-section-title">Three-stage approval process</h2>
-                <p className="kvb-section-sub">
-                  Every inspection follows a structured workflow to ensure quality and accountability
-                  at every checkpoint.
-                </p>
-              </div>
+              <RevealSection>
+                <div className="kvb-section-header">
+                  <p className="kvb-eyebrow">Inspection Lifecycle</p>
+                  <h2 className="kvb-section-title">Three-stage approval process</h2>
+                  <p className="kvb-section-sub">
+                    Every inspection follows a structured workflow to ensure quality and accountability
+                    at every checkpoint.
+                  </p>
+                </div>
+              </RevealSection>
 
-            <div className="kvb-workflow-steps">
-              {workflowSteps.map((step, idx) => (
-                <React.Fragment key={step.number}>
-                  {idx > 0 && <div className="kvb-workflow-arrow"><i className="fa fa-arrow-right"></i></div>}
-                  <WorkflowStep
-                    number={step.number}
-                    title={step.title}
-                    desc={step.desc}
-                  />
-                </React.Fragment>
-              ))}
+              <RevealSection>
+                <div className="kvb-workflow-steps">
+                  {workflowSteps.map((step, idx) => (
+                    <React.Fragment key={step.number}>
+                      {idx > 0 && <div className="kvb-workflow-arrow"><i className="fa fa-arrow-right"></i></div>}
+                      <WorkflowStep
+                        number={step.number}
+                        title={step.title}
+                        desc={step.desc}
+                      />
+                    </React.Fragment>
+                  ))}
+                </div>
+              </RevealSection>
             </div>
-          </div>
-        </section>
+          </section>
 
 <section className="lp-security">
             <div className="lp-container">
-              <div className="kvb-section-header">
-                <p className="kvb-eyebrow">Enterprise Security</p>
-                <h2 className="kvb-section-title">Built with regulatory compliance in mind</h2>
-                <p className="kvb-section-sub">
-                  Enterprise-grade security measures protect sensitive inspection data and ensure
-                  full compliance with Kenyan regulatory requirements.
-                </p>
-              </div>
-
-            <div className="kvb-security-grid">
-              {securityFeatures.map((feat) => (
-                <div key={feat.title} className="kvb-security-card">
-                  <div className="kvb-security-icon">
-                    <i className={`fa ${feat.icon}`}></i>
-                  </div>
-                  <h3>{feat.title}</h3>
-                  <p>{feat.desc}</p>
+              <RevealSection>
+                <div className="kvb-section-header">
+                  <p className="kvb-eyebrow">Enterprise Security</p>
+                  <h2 className="kvb-section-title">Built with regulatory compliance in mind</h2>
+                  <p className="kvb-section-sub">
+                    Enterprise-grade security measures protect sensitive inspection data and ensure
+                    full compliance with Kenyan regulatory requirements.
+                  </p>
                 </div>
-              ))}
+              </RevealSection>
+
+              <RevealSection>
+                <div className="kvb-security-grid">
+                  {securityFeatures.map((feat) => (
+                    <div key={feat.title} className="kvb-security-card">
+                      <div className="kvb-security-icon">
+                        <i className={`fa ${feat.icon}`}></i>
+                      </div>
+                      <h3>{feat.title}</h3>
+                      <p>{feat.desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </RevealSection>
             </div>
-          </div>
-        </section>
+          </section>
       </main>
 
 <footer id="contact" className="lp-footer">
