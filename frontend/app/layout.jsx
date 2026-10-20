@@ -6,7 +6,9 @@ const metadata = {
   title: 'KVB Inspection Portal',
   description: 'Kenya Veterinary Board - Upholding Veterinary Standards',
   icons: {
-    icon: '/favicon.ico',
+    icon: '/favicon.svg',
+    shortcut: '/favicon.svg',
+    apple: '/favicon.svg',
   },
   other: {
     'font-poppins': 'https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap',

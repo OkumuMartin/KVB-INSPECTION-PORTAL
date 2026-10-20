@@ -141,11 +141,13 @@ export default function LoginPage() {
             <i className="fa fa-arrow-left"></i> Back to Home
           </Link>
 
-          <ThemeToggle className="kvb-auth-theme-toggle" />
+          <div className="kvb-right-topbar">
+            <ThemeToggle className="kvb-auth-theme-toggle" />
 
-          <div className="kvb-date-pill">
-            <i className="fa fa-calendar-day"></i>
-            <span className="kvb-date-text">Loading date...</span>
+            <div className="kvb-date-pill">
+              <i className="fa fa-calendar-day"></i>
+              <span className="kvb-date-text">Loading date...</span>
+            </div>
           </div>
 
           <div className="kvb-right-header">

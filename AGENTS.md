@@ -106,8 +106,19 @@ npm run build        # Production build
 npm run lint         # ESLint
 npm run type-check   # TypeScript type checking
 npm test             # Unit tests (node:test, no test framework dependency)
+npm run audit:icons  # Check every Font Awesome name against the FA6 free set
+npm run test:ui      # Browser checks for the landing page and auth panels
+npm run test:auth    # Sign-in / sign-out flow checks against a running stack
+npm run crawl        # Load every route and report failed requests
+npm run screenshots  # Capture landing, login and dark-mode screenshots
 npm run format       # Prettier formatting
 ```
+
+The browser checks under `frontend/scripts/` drive the system Chrome through
+Playwright (`channel: 'chrome'`), so no browser download is needed. `npm run
+test:ui` and `npm run test:auth` expect the app to be running on
+`http://localhost:5173`; `test:auth` also needs the backend on port 5000 and
+signs in as `ui_test_inspector` / `Password123`.
 
 ## KVB Branding
 
@@ -129,6 +140,46 @@ npm run format       # Prettier formatting
 - express-validator for input validation
 - ESLint 9 flat config with React plugin
 - Prettier with Tailwind CSS class sorting
+
+## Frontend Styling Conventions
+
+- `frontend/app/globals.css` is loaded by the root layout, so it applies to every route. `frontend/styles/LandingPage.css`
+  is imported by the landing page only and is bundled into **its own CSS chunk**, which the browser loads *after*
+  `globals.css` and then keeps for the rest of the session — including after a client-side navigation to another
+  route. An unscoped selector in `LandingPage.css` therefore overrides the same selector in `globals.css` on routes
+  the landing page was never meant to style.
+  - This caused the brand text on the sign-in panel to render navy instead of white after a sign-out, because
+    `LandingPage.css` set `.kvb-logo-pill-text-main { color: var(--kvb-navy) }` for the hero.
+  - The rule now lives on `.kvb-logo-pill--hero .kvb-logo-pill-text-main`, and `globals.css` pins the auth panel with
+    `.kvb-left .kvb-logo-pill-text-main { color: #ffffff }`, which wins on specificity regardless of chunk order.
+  - **When a class is used on more than one route, scope the rule to the route's own wrapper.**
+- Font Awesome is loaded from the CDN as 6.5.1. `npm run audit:icons` checks every `fa-*` name in the source against
+  the free set, because a name that is not in the set renders as an empty box.
+- The `fa` base class sets `display: inline-block`. Any `<i class="fa ...">` that needs to be centred in a box must
+  set `display: inline-flex` on a selector that outranks it, or the glyph spills out of its container.
+
+## Landing Page
+
+- The "Our Services" section follows the visual identity of the Board's management system,
+  `https://mms.kenyavetboard.or.ke/#services`: a red-to-orange gradient icon tile, an uppercase category badge, an
+  "Available online" status pill, a 22px card with a soft layered shadow, and a green gradient pill button. The tokens
+  live on `.lp-shell` as `--pms-*` so the rest of the portal keeps its own palette.
+- Services that the Board runs elsewhere hand over to the Board's own systems (`mms.kenyavetboard.or.ke` for
+  registration and licensing, `kenyavetboard.or.ke/en/...` for education, downloads and enquiries). Only the
+  inspection service links back into this portal. External links open in a new tab with `rel="noopener noreferrer"`.
+
+## Session Handling
+
+- The session probe `GET /auth/me` answers **401 for every signed-out visitor**. It is expected, not an error.
+- The Axios response interceptor only redirects to `/login` on a 401 when the current route is **protected**. On a
+  public route a 401 just means "not signed in"; redirecting there used to bounce every guest off the landing page
+  before they could read it. `PUBLIC_ROUTES` in `frontend/lib/api.ts` lists the routes that must stay reachable.
+- Every query that hits a protected endpoint waits for the session to resolve before it fires
+  (`enabled: !authLoading && Boolean(user)` in `useInspections`, `useOutlets` and `useInspectionFormSchema`). Without
+  that gate the protected pages fired their list requests before the auth check and collected a 401 each time.
+- The brand text on the sign-in panel is pinned white by `.kvb-left .kvb-logo-pill-text-main` in `globals.css`. Keep
+  it that way: the sign-out path lands on `/login` with the landing page's stylesheet still loaded, so an unscoped
+  colour there repaints the text navy.
 
 ## Environment & Deployment Safety
 

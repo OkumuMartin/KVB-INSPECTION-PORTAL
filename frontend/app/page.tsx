@@ -37,70 +37,85 @@ const securityFeatures = [
   { icon: 'fa-user-lock', title: 'Audit Logging', desc: 'Every action logged with immutable timestamps for regulatory compliance.' },
 ];
 
-const kvbServices = [
+/* The Board's own sites. Every service that is not run by this portal
+   hands over to the relevant Board system. */
+const KVB_MAIN_SITE = 'https://kenyavetboard.or.ke/en';
+const KVB_PMS_LOGIN = 'https://mms.kenyavetboard.or.ke/site/login/';
+
+type BoardService = {
+  icon: string;
+  badge: string;
+  title: string;
+  desc: string;
+  link: string;
+  cta: string;
+  external: boolean;
+};
+
+const kvbServices: BoardService[] = [
   {
-    icon: 'fa-clipboard-check',
-    title: 'Registration',
-    desc: 'Veterinary surgeon and paraprofessional registration',
-    detail:
-      'Register veterinary surgeons and veterinary paraprofessionals with the Board, maintain professional records, and keep every credential current and verifiable.',
-    link: '#',
+    icon: 'fa-user-plus',
+    badge: 'Registration',
+    title: 'Register as a Professional',
+    desc: 'Register veterinary surgeons and veterinary paraprofessionals with the Board and keep every credential current and verifiable.',
+    link: KVB_PMS_LOGIN,
     cta: 'Start a registration',
+    external: true,
   },
   {
     icon: 'fa-file-invoice',
-    title: 'Licensing',
-    desc: 'Professional licence applications and renewals',
-    detail:
-      'Apply for and renew professional licences through a single workflow, with clear status tracking at every stage of the approval cycle.',
-    link: '#',
-    cta: 'Manage licences',
+    badge: 'Licensing',
+    title: 'Professional Licences',
+    desc: 'Apply for and renew professional licences through a single workflow, with clear status tracking at every stage of the approval cycle.',
+    link: KVB_PMS_LOGIN,
+    cta: 'Manage licenses',
+    external: true,
   },
   {
-    icon: 'fa-chart-bar',
-    title: 'Inspection',
-    desc: 'Outlet inspection and compliance monitoring',
-    detail:
-      'Conduct on-site inspections of veterinary inputs outlets, record findings against the KVB questionnaire, and track compliance to final certification.',
-    link: '#services',
+    icon: 'fa-clipboard-check',
+    badge: 'Inspection',
+    title: 'Outlet Inspection',
+    desc: 'Conduct on-site inspections of veterinary inputs outlets, record findings against the KVB questionnaire, and track compliance to final certification.',
+    link: '/login',
     cta: 'Open the portal',
+    external: false,
   },
   {
-    icon: 'fa-book',
-    title: 'Education',
-    desc: 'Veterinary education standards and accreditation',
-    detail:
-      'Access the standards and accreditation guidance that underpin veterinary training in Kenya, from continuing education to internship programme rules.',
-    link: '#',
+    icon: 'fa-graduation-cap',
+    badge: 'Education',
+    title: 'Veterinary Education Standards',
+    desc: 'Access the standards and accreditation guidance that underpin veterinary training in Kenya, from continuing education to internship programme rules.',
+    link: 'https://kenyavetboard.or.ke/en/registration/registration',
     cta: 'View the standards',
+    external: true,
   },
   {
     icon: 'fa-download',
-    title: 'Downloads',
-    desc: 'Forms, guidelines and publications',
-    detail:
-      'Download the official inspection forms, practice guidelines, and Board publications used across the profession.',
-    link: '#',
+    badge: 'Downloads',
+    title: 'Forms, Guidelines and Publications',
+    desc: 'Download the official inspection forms, practice guidelines and Board publications used across the profession.',
+    link: 'https://kenyavetboard.or.ke/en/downloads/forms',
     cta: 'Browse downloads',
+    external: true,
   },
   {
     icon: 'fa-envelope',
-    title: 'Enquiries',
-    desc: 'Contact us and file complaints',
-    detail:
-      'Reach the Board for enquiries, complaints and service requests, and follow the status of everything you raise with us.',
-    link: '#contact',
+    badge: 'Enquiries',
+    title: 'Contact Us and File Complaints',
+    desc: 'Reach the Board for enquiries, complaints and service requests, and follow the status of everything you raise with us.',
+    link: 'https://kenyavetboard.or.ke/en/contact',
     cta: 'Make an enquiry',
+    external: true,
   },
 ];
 
 const noticeItems = [
-  { text: 'Tender Notice - Site Visit', link: '#' },
-  { text: 'Launch of 2026 Veterinary Internship Programme', link: '#' },
-  { text: 'Veterinary Internship Guidelines', link: '#' },
-  { text: 'Election of Board Members', link: '#' },
-  { text: 'Retention Payment Options 2026', link: '#' },
-  { text: 'KVB Portal Account Activation Guide', link: '#' },
+  { text: 'Tender Notice - Site Visit', link: KVB_MAIN_SITE },
+  { text: 'Launch of 2026 Veterinary Internship Programme', link: KVB_MAIN_SITE },
+  { text: 'Veterinary Internship Guidelines', link: KVB_MAIN_SITE },
+  { text: 'Election of Board Members', link: KVB_MAIN_SITE },
+  { text: 'Retention Payment Options 2026', link: KVB_MAIN_SITE },
+  { text: 'KVB Portal Account Activation Guide', link: KVB_MAIN_SITE },
 ];
 
 function LogoPill() {
@@ -137,6 +152,53 @@ function WorkflowStep({ number, title, desc }: { number: string; title: string; 
   );
 }
 
+/**
+ * A single Board service card, laid out like the services grid on the Board's
+ * management system: an icon block on the left, the service category and its
+ * online status on the right, and the call to action on the footer row.
+ */
+function ServiceCard({ service, index = 0 }: { service: BoardService; index?: number }) {
+  const action = service.external ? (
+    <a href={service.link} className="kvb-service-button" target="_blank" rel="noopener noreferrer">
+      <span>{service.cta}</span>
+      <i className="fa fa-arrow-right"></i>
+    </a>
+  ) : (
+    <Link href={service.link} className="kvb-service-button">
+      <span>{service.cta}</span>
+      <i className="fa fa-arrow-right"></i>
+    </Link>
+  );
+
+  return (
+    <div className="kvb-service-card" style={{ transitionDelay: `${index * 70}ms` }}>
+      <div className="kvb-service-card-header">
+        <div className="kvb-service-icon-wrap">
+          <i className={`fa ${service.icon}`}></i>
+        </div>
+        <div className="kvb-service-badges">
+          <div className="kvb-service-badge-main">{service.badge}</div>
+          <div className="kvb-service-badge-status">
+            <i className="fa fa-circle"></i>
+            Available online
+          </div>
+        </div>
+      </div>
+
+      <h3 className="kvb-service-card-title">{service.title}</h3>
+      <p className="kvb-service-card-desc">{service.desc}</p>
+
+      <div className="kvb-service-card-footer">
+        <span className="kvb-service-meta-pill">
+          <i className="fa fa-circle-info"></i>
+          Regulated by Kenya Veterinary Board
+        </span>
+        {action}
+      </div>
+    </div>
+  );
+}
+
 /** A section that fades and lifts into place the first time it is scrolled to. */
 function RevealSection({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   const { ref, visible } = useReveal();
@@ -152,7 +214,6 @@ export default function LandingPage() {
   const [mounted] = useState(true);
   const [scrolled, setScrolled] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
-  const [activeService, setActiveService] = useState(2);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -166,8 +227,6 @@ export default function LandingPage() {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
-
-  const currentService = kvbServices[activeService];
 
   return (
     <>
@@ -308,58 +367,10 @@ export default function LandingPage() {
               </RevealSection>
 
               <RevealSection>
-                <div className="kvb-service-tabs">
-                  <div className="kvb-service-tablist" role="tablist" aria-label="Board services">
-                    {kvbServices.map((service, index) => (
-                      <button
-                        key={service.title}
-                        type="button"
-                        role="tab"
-                        id={`kvb-service-tab-${index}`}
-                        aria-selected={activeService === index}
-                        aria-controls={`kvb-service-panel-${index}`}
-                        tabIndex={activeService === index ? 0 : -1}
-                        className={`kvb-service-tab ${activeService === index ? 'is-active' : ''}`}
-                        onClick={() => setActiveService(index)}
-                        onKeyDown={(event) => {
-                          if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return;
-                          event.preventDefault();
-                          const delta = event.key === 'ArrowRight' ? 1 : -1;
-                          const next = (activeService + delta + kvbServices.length) % kvbServices.length;
-                          setActiveService(next);
-                          document.getElementById(`kvb-service-tab-${next}`)?.focus();
-                        }}
-                      >
-                        <span className="kvb-service-tab-icon">
-                          <i className={`fa ${service.icon}`}></i>
-                        </span>
-                        <span className="kvb-service-tab-text">
-                          <strong>{service.title}</strong>
-                          <small>{service.desc}</small>
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-
-                  <div
-                    className="kvb-service-panel"
-                    role="tabpanel"
-                    id={`kvb-service-panel-${activeService}`}
-                    aria-labelledby={`kvb-service-tab-${activeService}`}
-                    key={activeService}
-                  >
-                    <div className="kvb-service-panel-icon">
-                      <i className={`fa ${currentService.icon}`}></i>
-                    </div>
-                    <div className="kvb-service-panel-body">
-                      <h3>{currentService.title}</h3>
-                      <p>{currentService.detail}</p>
-                      <a href={currentService.link} className="btn btn-primary lp-btn-sm">
-                        {currentService.cta}
-                        <i className="fa fa-arrow-right"></i>
-                      </a>
-                    </div>
-                  </div>
+                <div className="kvb-service-grid">
+                  {kvbServices.map((service, index) => (
+                    <ServiceCard key={service.title} service={service} index={index} />
+                  ))}
                 </div>
               </RevealSection>
             </div>
@@ -531,9 +542,9 @@ export default function LandingPage() {
                     <strong>Quick Links</strong>
                     <ul>
                       <li><Link href="/">Home</Link></li>
-                      <li><a href="https://mms.kenyavetboard.or.ke/site/login">KVB PMS</a></li>
+                      <li><a href={KVB_PMS_LOGIN} target="_blank" rel="noopener noreferrer">KVB PMS</a></li>
                       <li><Link href="/login">Inspection Portal</Link></li>
-                      <li><a href="#">Notices</a></li>
+                      <li><a href={KVB_MAIN_SITE} target="_blank" rel="noopener noreferrer">Notices</a></li>
                     </ul>
                   </div>
                 </div>
@@ -554,10 +565,10 @@ export default function LandingPage() {
                   <div className="kvb-footer-col">
                     <strong>Support</strong>
                     <ul>
-                      <li><a href="#contact">Make an Enquiry</a></li>
-                      <li><a href="#contact">File a Complaint</a></li>
-                      <li><a href="#contact">Contact Us</a></li>
-                      <li><a href="#">FAQs</a></li>
+                      <li><a href="https://kenyavetboard.or.ke/en/contact" target="_blank" rel="noopener noreferrer">Make an Enquiry</a></li>
+                      <li><a href="https://kenyavetboard.or.ke/en/contact" target="_blank" rel="noopener noreferrer">File a Complaint</a></li>
+                      <li><a href="https://kenyavetboard.or.ke/en/contact" target="_blank" rel="noopener noreferrer">Contact Us</a></li>
+                      <li><a href="https://kenyavetboard.or.ke/en/faq" target="_blank" rel="noopener noreferrer">FAQ</a></li>
                     </ul>
                   </div>
                 </div>

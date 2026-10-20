@@ -1,4 +1,4 @@
-﻿/* ===== Landing Page â€” Enterprise KVB Portal ===== */
+/* ===== Landing Page â€” Enterprise KVB Portal ===== */
 /* Redesigned with KVB website palette and PMS login page aesthetic */
 
 /* ===== Shell ===== */
@@ -11,6 +11,23 @@
   background: var(--lp-surface);
   color: var(--lp-on-surface);
   transition: background 0.35s ease, color 0.35s ease;
+
+  /* The Board's management system (mms.kenyavetboard.or.ke) is the visual
+     reference for this page: a warm red-to-orange-to-green identity, soft
+     off-white surfaces, 22px cards and a light layered shadow. These tokens
+     are scoped to the landing page so the portal keeps its own palette. */
+  --pms-red: #c4161c;
+  --pms-orange: #e7491d;
+  --pms-green: #1a7b32;
+  --pms-deep-green: #0f5132;
+  --pms-soft: #f1f5f9;
+  --pms-text: #0f172a;
+  --pms-text-soft: #64748b;
+  --pms-radius: 22px;
+  --pms-shadow: 0 10px 30px rgba(15, 23, 42, 0.1);
+  --pms-shadow-lift: 0 18px 45px rgba(15, 23, 42, 0.14);
+  --pms-icon-gradient: linear-gradient(135deg, var(--pms-red), var(--pms-orange));
+  --pms-button-gradient: linear-gradient(135deg, var(--pms-green), #16a34a);
 }
 
 .lp-shell::before {
@@ -228,7 +245,12 @@
   box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
 }
 
-.kvb-logo-pill-text-main {
+/* The hero sits on a light wash, so its brand text is navy. The rule is
+   scoped to the hero variant on purpose: this stylesheet is bundled into its
+   own CSS chunk and loads after globals.css, so an unscoped colour here
+   would also repaint the brand text on the sign-in panel, which has to stay
+   white against its dark gradient. */
+.kvb-logo-pill--hero .kvb-logo-pill-text-main {
   font-size: 1.25rem;
   font-weight: 800;
   letter-spacing: 0.06em;
@@ -237,7 +259,7 @@
   opacity: 0.95;
 }
 
-.kvb-logo-pill-text-sub {
+.kvb-logo-pill--hero .kvb-logo-pill-text-sub {
   font-size: 0.9rem;
   opacity: 0.85;
   color: var(--kvb-navy);
@@ -545,23 +567,27 @@
 
 .kvb-section-header {
   text-align: center;
-  margin-bottom: 0.75rem !important;
+  margin-bottom: 1.5rem !important;
 }
 
+/* The eyebrow is the section headline. It is set large enough to read as one
+   and kept on a tight line so the headline group stays compact, which pulls
+   it closer to the content it introduces. */
 .kvb-eyebrow {
   color: var(--kvb-green);
   text-transform: uppercase;
-  letter-spacing: 0.14em;
-  font-size: 0.8rem;
+  letter-spacing: 0.16em;
+  font-size: 1.05rem;
   font-weight: 700;
-  margin-bottom: 0.4rem !important;
+  line-height: 1.2;
+  margin-bottom: 0.5rem !important;
 }
 
 .kvb-section-title {
-  font-size: clamp(2.3rem, 4.4vw, 3.45rem);
+  font-size: clamp(2.1rem, 3.9vw, 3rem);
   color: var(--kvb-green-dark);
-  margin: 0 0 0.4rem !important;
-  line-height: 1.08;
+  margin: 0 0 0.5rem !important;
+  line-height: 1.1;
   letter-spacing: -0.02em;
   font-weight: 800;
 }
@@ -590,10 +616,10 @@
 
 .kvb-feature-card {
   background: #ffffff;
-  border: 1px solid rgba(229, 231, 235, 0.5);
-  border-radius: var(--card-radius);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: var(--pms-radius);
   padding: 1.75rem 1.5rem;
-  box-shadow: 0 4px 15px rgba(15, 23, 42, 0.05);
+  box-shadow: var(--pms-shadow);
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease;
   text-align: center;
   position: relative;
@@ -613,8 +639,8 @@
 
 .kvb-feature-card:hover {
   transform: translateY(-6px);
-  box-shadow: 0 16px 38px rgba(15, 23, 42, 0.12);
-  border-color: rgba(26, 123, 50, 0.25);
+  box-shadow: var(--pms-shadow-lift);
+  border-color: rgba(26, 123, 50, 0.45);
 }
 
 .kvb-feature-card:hover::before {
@@ -626,29 +652,41 @@
   z-index: 1;
 }
 
+/* Icon tiles follow the Board services treatment: a coloured gradient block
+   with the glyph centred inside it, so every icon on the page shares one
+   shape and one optical weight. */
 .kvb-feature-icon {
-  width: 80px;
-  height: 80px;
-  border-radius: 22px;
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
   display: grid;
   place-items: center;
   margin: 0 auto 1rem;
-  font-size: 2.4rem;
+  font-size: 1.6rem;
+  line-height: 1;
+  color: #ffffff;
+}
+
+.kvb-feature-icon i {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
 .lp-fi-green {
-  background: linear-gradient(135deg, rgba(26, 123, 50, 0.12), rgba(26, 123, 50, 0.06));
-  color: var(--kvb-green);
+  background: linear-gradient(135deg, var(--pms-deep-green), var(--pms-green));
+  box-shadow: 0 12px 28px rgba(15, 81, 50, 0.35);
 }
 
 .lp-fi-navy {
-  background: linear-gradient(135deg, rgba(15, 23, 42, 0.12), rgba(15, 23, 42, 0.06));
-  color: var(--kvb-navy);
+  background: linear-gradient(135deg, #1e293b, #334155);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.3);
 }
 
 .lp-fi-gold {
-  background: linear-gradient(135deg, rgba(212, 175, 55, 0.16), rgba(212, 175, 55, 0.08));
-  color: var(--kvb-gold);
+  background: linear-gradient(135deg, #d4af37, #b8860b);
+  box-shadow: 0 12px 28px rgba(184, 134, 11, 0.32);
 }
 
 .kvb-feature-card h3 {
@@ -662,13 +700,6 @@
   font-size: 0.92rem;
   line-height: 1.6;
   margin: 0;
-}
-
-/* ===== Service Tabs ===== */
-
-.lp-services {
-  padding: 1.5rem 0;
-  background: var(--kvb-white);
 }
 
 /* ===== Notice Board Ticker ===== */
@@ -827,29 +858,34 @@
 
 .kvb-security-card {
   background: #ffffff;
-  border: 1px solid rgba(229, 231, 235, 0.5);
-  border-radius: var(--card-radius);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: var(--pms-radius);
   padding: 2.2rem;
-  box-shadow: 0 4px 15px rgba(15, 23, 42, 0.05);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  box-shadow: var(--pms-shadow);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
   text-align: center;
 }
 
 .kvb-security-card:hover {
   transform: translateY(-6px);
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.1);
+  border-color: rgba(26, 123, 50, 0.45);
+  box-shadow: var(--pms-shadow-lift);
 }
 
+/* The same icon language as the Board services: a gradient tile with the
+   glyph centred inside it. */
 .kvb-security-icon {
-  width: 72px;
-  height: 72px;
-  border-radius: 20px;
-  background: linear-gradient(135deg, rgba(15, 81, 50, 0.12), rgba(15, 81, 50, 0.06));
-  color: var(--kvb-green);
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, var(--pms-deep-green), var(--pms-green));
+  color: #ffffff;
   display: grid;
   place-items: center;
   margin: 0 auto 1rem;
-  font-size: 2.2rem;
+  font-size: 1.6rem;
+  line-height: 1;
+  box-shadow: 0 12px 28px rgba(15, 81, 50, 0.35);
 }
 
 .kvb-security-card h3 {
@@ -1330,149 +1366,181 @@
   }
 }
 
-/* ===== Service tabs ===== */
+/* ===== Board services (KVB management system reference layout) ===== */
 
-.kvb-service-tabs {
-  display: grid;
-  grid-template-columns: minmax(0, 320px) minmax(0, 1fr);
-  gap: 1.25rem;
-  align-items: stretch;
+.lp-services {
+  padding: 1.75rem 0 2.5rem;
+  background: var(--kvb-white);
 }
 
-.kvb-service-tablist {
+.kvb-service-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: 1.35rem;
+}
+
+.kvb-service-card {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.8rem;
+  min-height: 16rem;
+  padding: 1.15rem;
+  border-radius: var(--pms-radius);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: radial-gradient(circle at top left, rgba(248, 250, 252, 0.9) 0, transparent 52%),
+    var(--lp-surface-card);
+  box-shadow: var(--pms-shadow);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, background 0.18s ease;
 }
 
-.kvb-service-tab {
+.kvb-service-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(26, 123, 50, 0.7);
+  box-shadow: var(--pms-shadow-lift);
+  background: radial-gradient(circle at top left, rgba(220, 252, 231, 0.85) 0, transparent 55%), #ffffff;
+}
+
+.kvb-service-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.65rem;
+}
+
+/* The icon block matches the reference: a warm gradient tile with the glyph
+   centred inside it, so the icon can never sit on the tile edge. */
+.kvb-service-icon-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  border-radius: 18px;
+  background: radial-gradient(circle at 0 0, rgba(248, 250, 252, 0.9), transparent 60%),
+    var(--pms-icon-gradient);
+  color: #ffffff;
+  font-size: 1.55rem;
+  line-height: 1;
+  box-shadow: 0 12px 28px rgba(148, 27, 37, 0.45);
+}
+
+.kvb-service-icon-wrap i {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.kvb-service-badges {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.4rem;
+}
+
+.kvb-service-badge-main {
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  background: rgba(15, 23, 42, 0.02);
+  border: 1px solid rgba(148, 163, 184, 0.7);
+  color: var(--pms-text);
+}
+
+.kvb-service-badge-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.6rem 0.2rem 0.4rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 500;
+  background: rgba(22, 163, 74, 0.08);
+  color: #166534;
+}
+
+.kvb-service-badge-status i {
+  font-size: 0.4rem;
+  color: #16a34a;
+}
+
+.kvb-service-card-title {
+  margin: 0.15rem 0 0;
+  font-size: 1.02rem;
+  font-weight: 600;
+  color: var(--pms-text);
+}
+
+.kvb-service-card-desc {
+  margin: 0;
+  flex-grow: 1;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--pms-text-soft);
+}
+
+.kvb-service-card-footer {
   display: flex;
   align-items: center;
-  gap: 0.85rem;
-  width: 100%;
-  padding: 0.85rem 1rem;
-  border-radius: 14px;
-  border: 1px solid var(--kvb-border);
-  background: var(--lp-surface-card);
-  color: var(--lp-on-surface);
-  text-align: left;
-  cursor: pointer;
-  transition: transform 0.25s ease, border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+  justify-content: space-between;
+  gap: 0.65rem;
+  margin-top: 0.4rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.28);
 }
 
-.kvb-service-tab:hover {
-  transform: translateX(4px);
-  border-color: rgba(26, 123, 50, 0.45);
-  box-shadow: var(--shadow-sm);
-}
-
-.kvb-service-tab.is-active {
-  background: linear-gradient(135deg, var(--kvb-green-dark), var(--kvb-green));
-  border-color: transparent;
-  color: #ffffff;
-  box-shadow: 0 12px 28px rgba(15, 81, 50, 0.28);
-  transform: translateX(6px);
-}
-
-.kvb-service-tab-icon {
-  width: 40px;
-  height: 40px;
-  flex-shrink: 0;
-  border-radius: 12px;
-  display: grid;
-  place-items: center;
-  font-size: 1.05rem;
-  background: rgba(26, 123, 50, 0.12);
-  color: var(--kvb-green);
-  transition: background 0.25s ease, color 0.25s ease;
-}
-
-.kvb-service-tab.is-active .kvb-service-tab-icon {
-  background: rgba(255, 255, 255, 0.2);
-  color: #ffffff;
-}
-
-.kvb-service-tab-text {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.kvb-service-tab-text strong {
-  font-size: 0.95rem;
-  font-weight: 700;
-  line-height: 1.25;
-}
-
-.kvb-service-tab-text small {
-  font-size: 0.75rem;
+.kvb-service-meta-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.72rem;
   line-height: 1.35;
-  color: var(--lp-on-surface-muted);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  color: var(--pms-text-soft);
 }
 
-.kvb-service-tab.is-active .kvb-service-tab-text small {
-  color: rgba(255, 255, 255, 0.82);
-}
-
-.kvb-service-panel {
-  display: flex;
-  align-items: center;
-  gap: 1.75rem;
-  padding: 2.25rem 2.5rem;
-  border-radius: 24px;
-  border: 1px solid var(--kvb-border);
-  background: var(--lp-surface-card);
-  box-shadow: var(--shadow-md);
-  animation: lp-panel-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@keyframes lp-panel-in {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-.kvb-service-panel-icon {
-  width: 104px;
-  height: 104px;
+.kvb-service-meta-pill i {
+  font-size: 0.8rem;
   flex-shrink: 0;
-  border-radius: 28px;
-  display: grid;
-  place-items: center;
-  font-size: 2.6rem;
+}
+
+.kvb-service-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-width: 150px;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 999px;
+  background: var(--pms-button-gradient);
   color: #ffffff;
-  background: linear-gradient(135deg, var(--kvb-green), var(--kvb-green-dark));
-  box-shadow: 0 14px 34px rgba(15, 81, 50, 0.3);
+  font-size: 0.86rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow: 0 10px 22px rgba(16, 185, 129, 0.35);
+  transition: transform 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
 }
 
-.kvb-service-panel-body {
-  min-width: 0;
+.kvb-service-button:hover,
+.kvb-service-button:focus-visible {
+  transform: translateY(-1px);
+  background: linear-gradient(135deg, #15803d, #22c55e);
+  box-shadow: 0 12px 26px rgba(16, 185, 129, 0.4);
+  color: #ffffff;
 }
 
-.kvb-service-panel-body h3 {
-  margin: 0 0 0.5rem;
-  font-size: 1.6rem;
-  color: var(--kvb-green-dark);
+.kvb-service-button i {
+  transition: transform 0.25s ease;
 }
 
-[data-theme='dark'] .kvb-service-panel-body h3 {
-  color: var(--kvb-green-soft);
-}
-
-.kvb-service-panel-body p {
-  margin: 0 0 1.25rem;
-  font-size: 1rem;
-  line-height: 1.7;
-  color: var(--lp-on-surface-muted);
-  max-width: 60ch;
+.kvb-service-button:hover i {
+  transform: translateX(4px);
 }
 
 .lp-btn-sm {
@@ -1503,15 +1571,37 @@
 }
 
 [data-theme='dark'] .kvb-feature-card,
-[data-theme='dark'] .kvb-service-panel,
+[data-theme='dark'] .kvb-service-card,
 [data-theme='dark'] .kvb-security-card,
 [data-theme='dark'] .kvb-about-card,
 [data-theme='dark'] .kvb-mandate-card,
-[data-theme='dark'] .kvb-footer-col,
-[data-theme='dark'] .kvb-service-tab {
+[data-theme='dark'] .kvb-footer-col {
   background: var(--lp-surface-card);
   border-color: var(--kvb-border);
   color: var(--lp-on-surface);
+}
+
+[data-theme='dark'] .kvb-service-card {
+  background: var(--lp-surface-card);
+}
+
+[data-theme='dark'] .kvb-service-card-title {
+  color: var(--lp-on-surface);
+}
+
+[data-theme='dark'] .kvb-service-card-desc,
+[data-theme='dark'] .kvb-service-meta-pill {
+  color: var(--lp-on-surface-muted);
+}
+
+[data-theme='dark'] .kvb-service-badge-main {
+  background: rgba(15, 23, 42, 0.02);
+  border-color: var(--kvb-border);
+  color: var(--lp-on-surface);
+}
+
+[data-theme='dark'] .kvb-service-card-footer {
+  border-top-color: var(--kvb-border);
 }
 
 [data-theme='dark'] .kvb-feature-card h3,
@@ -1560,65 +1650,31 @@
   border-top-color: var(--kvb-border);
 }
 
-/* ===== Responsive: service tabs ===== */
+/* ===== Responsive: service grid ===== */
 
 @media (max-width: 1024px) {
-  .kvb-service-tabs {
-    grid-template-columns: 1fr;
-  }
-
-  .kvb-service-tablist {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.6rem;
-  }
-
-  .kvb-service-tab:hover,
-  .kvb-service-tab.is-active {
-    transform: none;
-  }
-
-  .kvb-service-panel {
-    padding: 1.75rem 1.75rem;
-    gap: 1.25rem;
-  }
-
-  .kvb-service-panel-icon {
-    width: 84px;
-    height: 84px;
-    font-size: 2.1rem;
-    border-radius: 24px;
+  .kvb-service-grid {
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   }
 }
 
 @media (max-width: 640px) {
-  .kvb-service-tablist {
+  .kvb-service-grid {
     grid-template-columns: 1fr;
   }
 
-  .kvb-service-tab {
-    padding: 0.7rem 0.85rem;
+  .kvb-service-card {
+    min-height: 0;
   }
 
-  .kvb-service-tab-text small {
-    display: none;
-  }
-
-  .kvb-service-panel {
+  /* The footer row stacks so the call to action never shrinks to a sliver. */
+  .kvb-service-card-footer {
     flex-direction: column;
-    align-items: flex-start;
-    padding: 1.5rem;
+    align-items: stretch;
   }
 
-  .kvb-service-panel-icon {
-    width: 64px;
-    height: 64px;
-    font-size: 1.6rem;
-    border-radius: 18px;
-  }
-
-  .kvb-service-panel-body h3 {
-    font-size: 1.3rem;
+  .kvb-service-button {
+    width: 100%;
   }
 
   .lp-theme-toggle-label {

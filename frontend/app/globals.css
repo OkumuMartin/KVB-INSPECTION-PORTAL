@@ -573,6 +573,20 @@
   opacity: 0.92;
 }
 
+/* The authentication panel paints its own dark gradient, so the brand text has
+   to stay white there. These rules are scoped to .kvb-left so they keep winning
+   over the landing page sheet: that sheet is bundled into its own CSS chunk and
+   loads after this one, so an unscoped rule there would repaint the sign-in
+   panel text navy — the reason the brand line turned black after signing out. */
+.kvb-left .kvb-logo-pill-text-main {
+  color: #ffffff;
+  opacity: 1;
+}
+
+.kvb-left .kvb-logo-pill-text-sub {
+  color: rgba(255, 255, 255, 0.88);
+}
+
 .kvb-left-title {
   font-size: 2.5rem;
   line-height: 1.05;
@@ -614,8 +628,11 @@
 
 /* The section shield is a bare glyph, not the 26px icon box used by the
    individual service rows. Give it its own sizing so it can never collide
-   with the heading text. */
-.kvb-services-shield {
+   with the heading text. The selector is qualified with the parent and the
+   element so it outranks the Font Awesome base rule, which would otherwise
+   fall back to `display: inline-block` and let the glyph spill out of the
+   rounded container. */
+.kvb-services-title i.kvb-services-shield {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -623,10 +640,11 @@
   height: 34px;
   flex-shrink: 0;
   font-size: 1rem;
+  line-height: 1;
+  vertical-align: middle;
   border-radius: 10px;
   background: rgba(212, 175, 55, 0.16);
   border: 1px solid rgba(212, 175, 55, 0.4);
-  line-height: 1;
 }
 
 .kvb-services-grid {
@@ -663,6 +681,10 @@
 }
 
 .kvb-service-icon i {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
   color: #ffffff;
   font-size: 0.82rem;
 }
@@ -1151,10 +1173,23 @@
     padding: 26px 22px 24px;
   }
 
+  /* Below the two-column breakpoint the panel is stacked, so the control row
+     joins the flow instead of floating over the form. */
+  .kvb-right-topbar {
+    position: static;
+    max-width: none;
+    margin-bottom: 14px;
+    justify-content: space-between;
+  }
+
   .kvb-date-pill {
     position: static;
     align-self: flex-end;
     margin-bottom: 12px;
+  }
+
+  .kvb-right-topbar .kvb-date-pill {
+    margin-bottom: 0;
   }
 
   .kvb-right-header {
@@ -1849,9 +1884,31 @@
   z-index: 3;
 }
 
-/* The login panel also shows the date pill in the top-right corner. */
-.kvb-auth-card--with-date .kvb-date-pill {
-  right: 104px;
+/* The theme control and the date pill both belong to the top-right corner of
+   the authentication panel. Laying them out in a single flex row keeps them
+   from overlapping: the previous fixed offset for the date pill was only
+   correct for one toggle width and collided as soon as the label grew. */
+.kvb-right-topbar {
+  position: absolute;
+  top: 20px;
+  right: 26px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: calc(100% - 52px);
+}
+
+.kvb-right-topbar .kvb-auth-theme-toggle {
+  position: static;
+  flex-shrink: 0;
+}
+
+.kvb-right-topbar .kvb-date-pill {
+  position: static;
+  flex-shrink: 0;
+  white-space: nowrap;
+  margin-bottom: 0;
 }
 
 [data-theme='dark'] .kvb-date-pill {
