@@ -2,9 +2,13 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../lib/api';
+import { useAuth } from '../context/AuthContext';
 
 export function useOutlets(filters = {}) {
   const queryClient = useQueryClient();
+  // The outlet list requires a session, so the request waits for the auth
+  // check instead of asking the API a question it can only refuse.
+  const { user, loading: authLoading } = useAuth();
 
   const {
     data,
@@ -23,6 +27,7 @@ export function useOutlets(filters = {}) {
       const res = await api.get(`/outlets?${queryParams.toString()}`);
       return res.data;
     },
+    enabled: !authLoading && Boolean(user),
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
   });
@@ -33,7 +38,7 @@ export function useOutlets(filters = {}) {
 
   return {
     data: data || { items: [], total: 0 },
-    loading,
+    loading: loading || authLoading,
     error: error?.message || '',
     refetch,
     invalidate,
@@ -41,6 +46,7 @@ export function useOutlets(filters = {}) {
 }
 
 export function useOutlet(id) {
+  const { user, loading: authLoading } = useAuth();
   const {
     data: outlet,
     isLoading: loading,
@@ -52,10 +58,10 @@ export function useOutlet(id) {
       return res.data.item;
     },
     staleTime: 5 * 60 * 1000,
-    enabled: !!id,
+    enabled: !authLoading && Boolean(user) && Boolean(id),
   });
 
-  return { outlet, loading, error: error?.message || '' };
+  return { outlet, loading: loading || authLoading, error: error?.message || '' };
 }
 
 export function useCreateOutlet() {

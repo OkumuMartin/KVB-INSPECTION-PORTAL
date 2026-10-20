@@ -2,6 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../lib/api';
+import { useAuth } from '../context/AuthContext';
 
 export const STATUS_LABELS = {
   DRAFT: 'Draft',
@@ -15,6 +16,10 @@ export const STATUS_LABELS = {
 
 export function useInspections(filters = {}) {
   const queryClient = useQueryClient();
+  // Inspection lists are behind authentication. Waiting for the session to
+  // resolve keeps a signed-out visitor from firing a request that can only
+  // ever answer 401.
+  const { user, loading: authLoading } = useAuth();
 
   const {
     data,
@@ -33,6 +38,7 @@ export function useInspections(filters = {}) {
       const res = await api.get(`/inspections?${queryParams.toString()}`);
       return res.data;
     },
+    enabled: !authLoading && Boolean(user),
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
   });
@@ -43,7 +49,7 @@ export function useInspections(filters = {}) {
 
   return {
     data: data || { items: [], total: 0, page: 1, limit: 25 },
-    loading,
+    loading: loading || authLoading,
     error: error?.message || '',
     refetch,
     invalidate,
@@ -51,6 +57,7 @@ export function useInspections(filters = {}) {
 }
 
 export function useInspection(id) {
+  const { user, loading: authLoading } = useAuth();
   const {
     data: inspection,
     isLoading: loading,
@@ -62,10 +69,10 @@ export function useInspection(id) {
       return res.data;
     },
     staleTime: 5 * 60 * 1000,
-    enabled: !!id,
+    enabled: !authLoading && Boolean(user) && Boolean(id),
   });
 
-  return { inspection, loading, error: error?.message || '' };
+  return { inspection, loading: loading || authLoading, error: error?.message || '' };
 }
 
 export function useCreateInspection() {

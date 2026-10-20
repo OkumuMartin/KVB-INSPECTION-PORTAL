@@ -47,6 +47,15 @@ api.interceptors.request.use(
   (error) => Promise.reject(error),
 );
 
+// Routes that a signed-out visitor is allowed to reach. The session probe
+// answers 401 for every guest, so redirecting on it would bounce visitors off
+// the public landing page before they ever saw it.
+const PUBLIC_ROUTES = ['/', '/login', '/register', '/forgot-password', '/reset-password', '/unauthorized'];
+
+function isPublicRoute(pathname: string): boolean {
+  return PUBLIC_ROUTES.some((route) => pathname === route || pathname.startsWith(`${route}/`));
+}
+
 // Response interceptor: keep the CSRF token in sync with the server.
 // The backend echoes the authoritative token in the X-CSRF-Token header on
 // every response. Reading it here guarantees the value we echo back in the
@@ -93,11 +102,11 @@ api.interceptors.response.use(
       }
     }
 
-    // On 401, redirect to login
-    if (status === 401) {
-      if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
-        window.location.href = '/login';
-      }
+    // On 401, send the user to the sign-in page. This only applies to
+    // protected pages: on a public page a 401 simply means "not signed in",
+    // and redirecting there would hide the landing page from every guest.
+    if (status === 401 && typeof window !== 'undefined' && !isPublicRoute(window.location.pathname)) {
+      window.location.href = '/login';
     }
     return Promise.reject(error);
   },
