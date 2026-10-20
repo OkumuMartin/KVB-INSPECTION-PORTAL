@@ -339,12 +339,12 @@ export default function LandingPage() {
                 <div className="kvb-ticker-items">
                   {noticeItems.map((item) => (
                     <span key={item.text}>
-                      <a href={item.link}>{item.text}</a>
+                      <a href={item.link} target="_blank" rel="noopener noreferrer">{item.text}</a>
                     </span>
                   ))}
                   {noticeItems.map((item) => (
                     <span key={item.text + '-dup'}>
-                      <a href={item.link}>{item.text}</a>
+                      <a href={item.link} target="_blank" rel="noopener noreferrer">{item.text}</a>
                     </span>
                   ))}
                 </div>

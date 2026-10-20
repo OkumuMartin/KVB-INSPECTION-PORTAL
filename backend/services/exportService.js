@@ -115,9 +115,142 @@ function buildWordBuffer(inspection) {
 function buildExcelBuffer(inspection) {
   const rows = flattenInspection(inspection);
   const ws = XLSX.utils.aoa_to_sheet(rows);
-  const wb = XLSX.utils.book_new();
+  const wb = XLSX.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Inspection');
   return XLSX.write(wb, { bookType: 'xlsx', type: 'buffer' });
 }
 
-module.exports = { buildWordBuffer, buildExcelBuffer, flattenInspection };
+/**
+ * One summary row per inspection. Shared by the bulk spreadsheet and the
+ * bulk PDF so both exports describe the same set of fields.
+ */
+function summariseInspection(inspection) {
+  const form = inspection.formData || {};
+  const outletInfo = form.outletInformation || {};
+  const owner = form.ownerInformation || {};
+  const outletRecord = inspection.outlet && typeof inspection.outlet === 'object' ? inspection.outlet : {};
+  const inspector = inspection.inspector && typeof inspection.inspector === 'object' ? inspection.inspector : {};
+
+  return {
+    inspectionNumber: inspection.inspectionNumber || '',
+    date: inspection.inspectionDate ? new Date(inspection.inspectionDate).toLocaleDateString() : '',
+    status: STATUS_LABELS[inspection.status] || inspection.status || '',
+    outletName: outletInfo.outletName || outletRecord.outletName || '',
+    county: outletInfo.county || outletRecord.county || '',
+    subCounty: outletInfo.subCounty || outletRecord.subCounty || '',
+    ownerName: owner.ownerName || outletRecord.ownerName || '',
+    telephone: owner.telephone || outletRecord.ownerPhone || '',
+    inspector: inspector.name || '',
+  };
+}
+
+const SUMMARY_HEADERS = [
+  'Inspection Number',
+  'Date',
+  'Status',
+  'Outlet Name',
+  'County',
+  'Sub-County',
+  'Owner Name',
+  'Telephone',
+  'Inspector',
+];
+
+function buildBulkExcelBuffer(inspections) {
+  const rows = [SUMMARY_HEADERS];
+  for (const inspection of inspections) {
+    const row = summariseInspection(inspection);
+    rows.push([
+      row.inspectionNumber,
+      row.date,
+      row.status,
+      row.outletName,
+      row.county,
+      row.subCounty,
+      row.ownerName,
+      row.telephone,
+      row.inspector,
+    ]);
+  }
+
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  const wb = XLSX.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Reports');
+  return XLSX.write(wb, { bookType: 'xlsx', type: 'buffer' });
+}
+
+function buildBulkWordBuffer(inspections) {
+  const children = [];
+
+  children.push(new Paragraph({ text: 'KENYA VETERINARY BOARD', style: 'Heading1', alignment: AlignmentType.CENTER }));
+  children.push(new Paragraph({ text: 'Veterinary Inspection Reports', alignment: AlignmentType.CENTER }));
+  children.push(
+    new Paragraph({
+      text: `${inspections.length} inspection(s) included | generated on ${new Date().toLocaleString()}`,
+      alignment: AlignmentType.CENTER,
+    }),
+  );
+  children.push(new Paragraph({ text: '' }));
+
+  // Summary table first, so the document opens with the overview.
+  const summaryRows = [
+    SUMMARY_HEADERS.map((header) => new TableCell({ children: [new Paragraph({ text: header, bold: true })] })),
+    ...inspections.map((inspection) => {
+      const row = summariseInspection(inspection);
+      return [
+        row.inspectionNumber,
+        row.date,
+        row.status,
+        row.outletName,
+        row.county,
+        row.subCounty,
+        row.ownerName,
+        row.telephone,
+        row.inspector,
+      ].map((cell) => new TableCell({ children: [new Paragraph({ text: String(cell) })] }));
+    }),
+  ];
+  children.push(new Table({ rows: summaryRows }));
+
+  // Then the full report for every inspection, each on its own page.
+  for (const inspection of inspections) {
+    const rows = flattenInspection(inspection);
+    children.push(
+      new Paragraph({
+        text: `Inspection ${inspection.inspectionNumber}`,
+        style: 'Heading2',
+        pageBreakBefore: true,
+      }),
+    );
+    children.push(
+      new Table({
+        rows: rows.map((row, ri) => new TableRow({
+          children: row.map((cell) => new TableCell({
+            children: [new Paragraph({ text: String(cell), bold: ri === 0 })],
+            width: { size: 50, type: WidthType.PERCENTAGE },
+          })),
+        })),
+      }),
+    );
+  }
+
+  return new Document({
+    styles: {
+      paragraphStyles: [
+        { id: 'Heading1', name: 'Heading1', run: { bold: true, size: 28, color: KVB_DARK_GREEN } },
+        { id: 'Heading2', name: 'Heading2', run: { bold: true, size: 24, color: KVB_DARK_GREEN } },
+      ],
+    },
+    sections: [{ children }],
+  }).then((doc) => Packer.toBuffer(doc));
+}
+
+module.exports = {
+  buildWordBuffer,
+  buildExcelBuffer,
+  buildBulkWordBuffer,
+  buildBulkExcelBuffer,
+  flattenInspection,
+  summariseInspection,
+  SUMMARY_HEADERS,
+};

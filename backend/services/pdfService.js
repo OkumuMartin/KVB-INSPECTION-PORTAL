@@ -379,4 +379,83 @@ function generatePdfBuffer(inspection) {
   });
 }
 
-module.exports = { generatePdfBuffer, buildDocDefinition };
+/**
+ * A summary table for a bulk export. The same columns are used by the bulk
+ * spreadsheet so both exports describe the same set of fields.
+ */
+function buildSummaryTable(rows) {
+  const body = [
+    [
+      { text: 'Inspection No.', style: 'tableHeader' },
+      { text: 'Date', style: 'tableHeader' },
+      { text: 'Status', style: 'tableHeader' },
+      { text: 'Outlet', style: 'tableHeader' },
+      { text: 'County', style: 'tableHeader' },
+    ],
+  ];
+
+  for (const row of rows) {
+    body.push([
+      { text: row.inspectionNumber },
+      { text: row.date },
+      { text: row.status },
+      { text: row.outletName },
+      { text: row.county },
+    ]);
+  }
+
+  return {
+    table: { headerRows: 1, widths: ['22%', '12%', '20%', '28%', '18%'], body },
+    layout: 'lightHorizontalLines',
+    margin: [0, 0, 0, 8],
+  };
+}
+
+/**
+ * A bulk export: a cover page with the summary table, then the full report
+ * for every inspection, each starting on a new page.
+ */
+function buildBulkPdfBuffer(inspections, summaryRows) {
+  const content = [
+    { text: 'KENYA VETERINARY BOARD', style: 'docTitle', fontSize: 15, textColor: KVB_DARK_GREEN, margin: [0, 0, 0, 2] },
+    { text: 'Veterinary Inspection Reports', style: 'docTitle', fontSize: 13, margin: [0, 0, 0, 2] },
+    { text: `Generated on ${new Date().toLocaleString()}`, style: 'label', alignment: 'center', margin: [0, 0, 0, 2] },
+    { text: `${inspections.length} inspection(s) included`, style: 'label', alignment: 'center', margin: [0, 0, 0, 10] },
+    buildSummaryTable(summaryRows),
+  ];
+
+  for (const inspection of inspections) {
+    const definition = buildDocDefinition(inspection);
+    definition.content.forEach((item, index) => {
+      content.push(index === 0 ? { ...item, pageBreak: 'before' } : item);
+    });
+  }
+
+  const docDefinition = {
+    pageSize: 'A4',
+    pageOrientation: 'portrait',
+    footer: (currentPage, pageCount) => ({
+      text: `Page ${currentPage} of ${pageCount} | Kenya Veterinary Board`,
+      style: 'label',
+      alignment: 'center',
+    }),
+    ...buildStyles(),
+    content,
+  };
+
+  return new Promise((resolve, reject) => {
+    try {
+      const document = PRINTER.createPdfKitDocument(docDefinition);
+      const chunks = [];
+
+      document.on('data', (chunk) => chunks.push(chunk));
+      document.on('end', () => resolve(Buffer.concat(chunks)));
+      document.on('error', reject);
+      document.end();
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
+module.exports = { generatePdfBuffer, buildDocDefinition, buildBulkPdfBuffer };

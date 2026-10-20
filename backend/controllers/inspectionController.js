@@ -2,8 +2,8 @@ const { Inspection, Outlet, User, InspectionComment } = require('../models');
 const { createAuditLog, listInspectionAuditLogs } = require('../services/auditLogService');
 const { generateInspectionNumber } = require('../services/inspectionNumberService');
 const { sendEmail, buildInternalEmail } = require('../services/emailService');
-const { generatePdfBuffer } = require('../services/pdfService');
-const { buildWordBuffer, buildExcelBuffer } = require('../services/exportService');
+const { generatePdfBuffer, buildBulkPdfBuffer } = require('../services/pdfService');
+const { buildWordBuffer, buildExcelBuffer, buildBulkWordBuffer } = require('../services/exportService');
 const { validateTransition } = require('../services/workflowService');
 const {
   buildFormDataFromOutlet,
@@ -933,8 +933,26 @@ async function exportReports(req, res, next) {
       return res.send(buffer);
     }
 
-    // Default: PDF via simple concatenation not supported; return JSON hint
-    return res.status(400).json({ success: false, message: `Format '${format}' not supported for bulk export. Use Excel.` });
+    if (format === 'word') {
+      const buffer = await buildBulkWordBuffer(inspections);
+      res.set({
+        'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'Content-Length': buffer.length,
+        'Content-Disposition': 'attachment; filename="kvb-reports.docx"',
+      });
+      return res.send(buffer);
+    }
+
+    // PDF — build summary rows from the same summariseInspection helper
+    const { summariseInspection } = require('../services/exportService');
+    const summaryRows = inspections.map((ins) => summariseInspection(ins));
+    const buffer = await buildBulkPdfBuffer(inspections, summaryRows);
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Length': buffer.length,
+      'Content-Disposition': 'attachment; filename="kvb-reports.pdf"',
+    });
+    return res.send(buffer);
   } catch (error) {
     return next(error);
   }

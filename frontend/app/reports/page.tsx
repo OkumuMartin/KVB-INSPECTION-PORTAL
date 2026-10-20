@@ -21,7 +21,7 @@ export default function ReportsPage() {
       return;
     }
     const qs = new URLSearchParams({ format, ids: ids.join(',') });
-    window.open(`/api/reports/export?${qs}`, '_blank', 'noopener,noreferrer');
+    window.open(`/api/inspections/export?${qs}`, '_blank', 'noopener,noreferrer');
   };
 
   return (
