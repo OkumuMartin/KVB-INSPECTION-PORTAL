@@ -165,6 +165,70 @@ Tel: +254-722 305 253 | +254-701 581 718
   };
 }
 
+function buildPasswordResetEmail({ name, resetUrl, expiresInMinutes = 60 }) {
+  const safeName = String(name || 'User').replace(/[<>&"']/g, '');
+  const safeUrl = String(resetUrl || '').replace(/[<>&"']/g, '');
+
+  return {
+    html: `
+      <html>
+      <head>
+        <style>
+          body { font-family: 'Segoe UI', Arial, sans-serif; color: #202a2f; background: #f7f8f4; margin: 0; padding: 30px; }
+          .container { max-width: 640px; margin: 0 auto; background: #ffffff; border: 1px solid #dfe6df; border-radius: 14px; box-shadow: 0 10px 30px rgba(15,107,62,0.08); }
+          .header { background: #0b4d32; color: white; padding: 20px 30px; border-radius: 14px 14px 0 0; }
+          .header h1 { margin: 0; font-size: 20px; }
+          .header .subtitle { color: rgba(255,255,255,0.8); font-size: 13px; margin-top: 4px; }
+          .body { padding: 28px 30px; }
+          .body h2 { margin: 0 0 12px; font-size: 17px; color: #102a43; }
+          .body p { margin: 0 0 14px; line-height: 1.6; }
+          .btn { display: inline-block; padding: 12px 26px; background: #0f6b3e; color: #ffffff !important; text-decoration: none; border-radius: 10px; font-weight: 700; margin: 6px 0 14px; }
+          .note { background: #f9faf7; border: 1px solid #dfe6df; border-radius: 10px; padding: 14px; margin: 16px 0; font-size: 14px; line-height: 1.6; }
+          .footer { padding: 16px 30px; background: #f9faf7; border-radius: 0 0 14px 14px; font-size: 12px; color: #5c6770; text-align: center; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>Kenya Veterinary Board</h1>
+            <div class="subtitle">Veterinary Inspection Portal &mdash; Password Reset</div>
+          </div>
+          <div class="body">
+            <h2>Reset your password</h2>
+            <p>Hello ${safeName},</p>
+            <p>We received a request to reset the password for your Inspection Portal account. Use the button below to choose a new password.</p>
+            <a class="btn" href="${safeUrl}">Reset my password</a>
+            <p>If the button does not work, copy and paste this link into your browser:</p>
+            <p><a href="${safeUrl}" style="color:#0f6b3e;word-break:break-all;">${safeUrl}</a></p>
+            <div class="note">
+              This link expires in <strong>${expiresInMinutes} minutes</strong>. If you did not request a password reset you can safely ignore this email &mdash; your password will not change.
+            </div>
+          </div>
+          <div class="footer">
+            Kenya Veterinary Board &mdash; Upholding Veterinary Standards<br>
+            P.O. Box 513 - 00605, Uthiru | Tel: +254-722 305 253 | info@kenyavetboard.or.ke
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+    text: `
+Kenya Veterinary Board - Veterinary Inspection Portal
+
+Reset your password
+
+Hello ${safeName},
+
+We received a request to reset your Inspection Portal account password.
+Open this link to choose a new password:
+
+${safeUrl}
+
+This link expires in ${expiresInMinutes} minutes. If you did not request a reset, ignore this email.
+    `,
+  };
+}
+
 async function sendEmail({ to, emailType, subject, html, text, inspection, attachments, sender }) {
   const transporter = createTransporter();
 
@@ -308,5 +372,6 @@ module.exports = {
   retryEmail,
   buildInternalEmail,
   buildOwnerEmail,
+  buildPasswordResetEmail,
   isSmtpConfigured,
 };

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { OUTLET_TYPES } from '../../lib/inspectionForm';
+import { OUTLET_TYPES, FALLBACK_TRAINING_LEVELS, trainingLevelOptions } from '../../lib/inspectionForm';
 import { useRegions } from '../../hooks/useInspectionFormSchema';
 
 const FIELD_LABELS = {
@@ -145,6 +145,20 @@ export default function OutletEditForm({ outlet, onCancel, onSubmit, submitting 
                 {subCounties.map((entry) => (
                   <option key={entry} value={entry}>
                     {entry}
+                  </option>
+                ))}
+              </select>
+            ) : field === 'ownerTrainingLevel' ? (
+              <select
+                id="outlet-ownerTrainingLevel"
+                className={inputClass}
+                value={form.ownerTrainingLevel}
+                onChange={handleChange('ownerTrainingLevel')}
+              >
+                <option value="">Select level of training…</option>
+                {trainingLevelOptions(FALLBACK_TRAINING_LEVELS, form.ownerTrainingLevel).map((level) => (
+                  <option key={level} value={level}>
+                    {level}
                   </option>
                 ))}
               </select>

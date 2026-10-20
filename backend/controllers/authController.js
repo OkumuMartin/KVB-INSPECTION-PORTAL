@@ -1,9 +1,16 @@
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const { User } = require('../models');
 const { signToken, sanitizeUser } = require('../utils/auth');
 const { createAuditLog } = require('../services/auditLogService');
+const { sendEmail, buildPasswordResetEmail } = require('../services/emailService');
 
 const BCRYPT_ROUNDS = parseInt(process.env.BCRYPT_ROUNDS, 10) || 12;
+const RESET_TOKEN_TTL_MINUTES = parseInt(process.env.PASSWORD_RESET_TTL_MINUTES, 10) || 60;
+
+function hashResetToken(token) {
+  return crypto.createHash('sha256').update(token).digest('hex');
+}
 
 async function login(req, res, next) {
   try {
@@ -157,4 +164,160 @@ async function register(req, res, next) {
   }
 }
 
-module.exports = { login, logout, me, register };
+// Public self-registration. New accounts are always created as INSPECTOR and
+// ACTIVE; a system administrator can later change the role or deactivate the
+// account. Elevating roles here would be a privilege-escalation hole.
+async function publicRegister(req, res, next) {
+  try {
+    const { name, email, username, password } = req.body || {};
+
+    const normalizedEmail = String(email || '').toLowerCase().trim();
+    const normalizedUsername = String(username || '').trim();
+
+    if (await User.findOne({ email: normalizedEmail })) {
+      return res.status(409).json({ message: 'An account with that email already exists.' });
+    }
+
+    if (await User.findOne({ username: normalizedUsername })) {
+      return res.status(409).json({ message: 'That username is already taken.' });
+    }
+
+    const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
+
+    const user = await User.create({
+      name: String(name || '').trim(),
+      email: normalizedEmail,
+      username: normalizedUsername,
+      passwordHash,
+      role: 'INSPECTOR',
+      status: 'ACTIVE',
+    });
+
+    await createAuditLog({
+      user: user._id,
+      role: 'INSPECTOR',
+      action: 'USER_CREATED',
+      req,
+      metadata: { createdUser: user._id, role: 'INSPECTOR', selfRegistered: true },
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: 'Account created successfully. You can now sign in to the portal.',
+      user: sanitizeUser(user),
+    });
+  } catch (error) {
+    if (error && error.code === 11000) {
+      return res.status(409).json({ message: 'An account with that email or username already exists.' });
+    }
+    next(error);
+  }
+}
+
+// Issues a one-time password-reset link. The response is deliberately
+// identical whether or not the email exists, so the endpoint cannot be used to
+// enumerate registered accounts.
+async function forgotPassword(req, res, next) {
+  try {
+    const email = String(req.body?.email || '').toLowerCase().trim();
+    const genericMessage =
+      'If an account exists for that email address, a password reset link has been sent.';
+
+    const user = await User.findOne({ email });
+
+    if (!user || user.status !== 'ACTIVE') {
+      await createAuditLog({
+        action: 'PASSWORD_RESET',
+        req,
+        metadata: { email, outcome: 'no_active_account' },
+      }).catch(() => {});
+      return res.json({ success: true, message: genericMessage });
+    }
+
+    const rawToken = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date(Date.now() + RESET_TOKEN_TTL_MINUTES * 60 * 1000);
+
+    user.passwordResetToken = hashResetToken(rawToken);
+    user.passwordResetExpires = expiresAt;
+    await user.save();
+
+    const baseUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const resetUrl = `${String(baseUrl).replace(/\/$/, '')}/reset-password?token=${rawToken}`;
+
+    const { html, text } = buildPasswordResetEmail({
+      name: user.name,
+      resetUrl,
+      expiresInMinutes: RESET_TOKEN_TTL_MINUTES,
+    });
+
+    try {
+      await sendEmail({
+        to: user.email,
+        emailType: 'PASSWORD_RESET',
+        subject: 'KVB Inspection Portal - Reset your password',
+        html,
+        text,
+      });
+    } catch (emailError) {
+      console.error('Password reset email failed:', emailError.message);
+    }
+
+    await createAuditLog({
+      user: user._id,
+      role: user.role,
+      action: 'PASSWORD_RESET',
+      req,
+      metadata: { email: user.email, outcome: 'link_sent' },
+    }).catch(() => {});
+
+    const response = { success: true, message: genericMessage };
+
+    // The reset link is only echoed back when explicitly opted in, so a
+    // misconfigured production deployment can never leak a live reset URL.
+    if (process.env.EXPOSE_RESET_LINK === 'true') {
+      response.devResetUrl = resetUrl;
+    }
+
+    return res.json(response);
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function resetPassword(req, res, next) {
+  try {
+    const { token, password } = req.body || {};
+
+    if (!token || !password) {
+      return res.status(400).json({ message: 'Reset token and new password are required.' });
+    }
+
+    const user = await User.findOne({
+      passwordResetToken: hashResetToken(String(token)),
+      passwordResetExpires: { $gt: new Date() },
+    }).select('+passwordResetToken +passwordResetExpires');
+
+    if (!user) {
+      return res.status(400).json({ message: 'This reset link is invalid or has expired. Please request a new one.' });
+    }
+
+    user.passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+    await user.save();
+
+    await createAuditLog({
+      user: user._id,
+      role: user.role,
+      action: 'PASSWORD_RESET',
+      req,
+      metadata: { email: user.email, outcome: 'password_updated' },
+    }).catch(() => {});
+
+    return res.json({ success: true, message: 'Your password has been updated. You can now sign in.' });
+  } catch (error) {
+    next(error);
+  }
+}
+
+module.exports = { login, logout, me, register, publicRegister, forgotPassword, resetPassword };

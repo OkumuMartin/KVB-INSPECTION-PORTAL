@@ -123,6 +123,132 @@ const { MongoMemoryServer } = require('mongodb-memory-server');
   console.log(`Login audit IP captured        -> ${loginLog && loginLog.ipAddress ? 'OK (' + loginLog.ipAddress + ')' : '(!!! MISSING)'}`);
   assert.ok(loginLog && loginLog.ipAddress);
 
+  // --- CSRF token delivery -------------------------------------------------
+  const csrfRes = await fetch(base + '/api/csrf-token');
+  const csrfToken = csrfRes.headers.get('x-csrf-token');
+  console.log(`CSRF header on response        -> ${csrfToken ? 'OK' : '(!!! MISSING)'}`);
+  assert.ok(csrfToken, 'X-CSRF-Token must be exposed on every response');
+  assert.ok(
+    csrfRes.headers.get('access-control-expose-headers')?.includes('X-CSRF-Token'),
+    'CORS must expose X-CSRF-Token to the browser client',
+  );
+
+  // --- Public self-registration -------------------------------------------
+  const reg = await call('POST', '/api/auth/register', null, {
+    name: 'Jane Wanjiku',
+    email: 'jane@verify.test',
+    username: 'jane',
+    password: 'Password123',
+  });
+  console.log(`Public register                -> ${reg.status} ${reg.status === 201 ? '(201 OK)' : '(!!! ' + reg.status + ')'}`);
+  assert.strictEqual(reg.status, 201);
+  assert.strictEqual(reg.json.user.role, 'INSPECTOR', 'self-registration must never grant an elevated role');
+
+  const escalate = await call('POST', '/api/auth/register', null, {
+    name: 'Escalator',
+    email: 'esc@verify.test',
+    username: 'esc',
+    password: 'Password123',
+    role: 'SYSTEM_ADMIN',
+  });
+  console.log(`Role escalation blocked        -> ${escalate.json.user.role === 'INSPECTOR' ? 'OK' : '(!!! ' + escalate.json.user.role + ')'}`);
+  assert.strictEqual(escalate.json.user.role, 'INSPECTOR');
+
+  const dup = await call('POST', '/api/auth/register', null, {
+    name: 'Jane Again', email: 'jane@verify.test', username: 'jane2', password: 'Password123',
+  });
+  console.log(`Duplicate registration rejected-> ${dup.status} ${dup.status === 409 ? '(409 OK)' : '(!!! ' + dup.status + ')'}`);
+  assert.strictEqual(dup.status, 409);
+
+  const weak = await call('POST', '/api/auth/register', null, {
+    name: 'Weak', email: 'weak@verify.test', username: 'weak', password: 'short',
+  });
+  console.log(`Weak password rejected         -> ${weak.status} ${weak.status === 400 ? '(400 OK)' : '(!!! ' + weak.status + ')'}`);
+  assert.strictEqual(weak.status, 400);
+
+  // --- Password recovery ---------------------------------------------------
+  const forgotUnknown = await call('POST', '/api/auth/forgot-password', null, { email: 'nobody@verify.test' });
+  console.log(`Forgot password (unknown)      -> ${forgotUnknown.status} ${forgotUnknown.status === 200 ? '(200 OK)' : '(!!! ' + forgotUnknown.status + ')'}`);
+  assert.strictEqual(forgotUnknown.status, 200);
+
+  process.env.EXPOSE_RESET_LINK = 'true';
+  const forgot = await call('POST', '/api/auth/forgot-password', null, { email: 'jane@verify.test' });
+  console.log(`Forgot password (known)        -> ${forgot.status} ${forgot.status === 200 ? '(200 OK)' : '(!!! ' + forgot.status + ')'}`);
+  assert.strictEqual(forgot.status, 200);
+  const resetUrl = forgot.json.devResetUrl;
+  assert.ok(resetUrl, 'a reset link must be issued for a known address');
+  const rawToken = new URL(resetUrl).searchParams.get('token');
+  assert.ok(rawToken);
+
+  const storedUser = await User.findOne({ email: 'jane@verify.test' }).select('+passwordResetToken +passwordResetExpires');
+  assert.ok(storedUser.passwordResetToken, 'a reset token digest must be stored');
+  assert.notStrictEqual(
+    storedUser.passwordResetToken,
+    rawToken,
+    'the raw reset token must never be stored — only its digest',
+  );
+  assert.ok(storedUser.passwordResetExpires, 'the reset token must carry an expiry');
+  assert.ok(
+    storedUser.passwordResetExpires.getTime() > Date.now(),
+    'the reset token must not be expired when it is issued',
+  );
+
+  const badReset = await call('POST', '/api/auth/reset-password', null, { token: 'deadbeef', password: 'NewPassword123' });
+  console.log(`Invalid reset token rejected   -> ${badReset.status} ${badReset.status === 400 ? '(400 OK)' : '(!!! ' + badReset.status + ')'}`);
+  assert.strictEqual(badReset.status, 400);
+
+  const reset = await call('POST', '/api/auth/reset-password', null, { token: rawToken, password: 'NewPassword123' });
+  console.log(`Password reset accepted        -> ${reset.status} ${reset.status === 200 ? '(200 OK)' : '(!!! ' + reset.status + ')'}`);
+  assert.strictEqual(reset.status, 200);
+
+  const newLogin = await call('POST', '/api/auth/login', null, { username: 'jane', password: 'NewPassword123' });
+  console.log(`Login with the new password    -> ${newLogin.status} ${newLogin.status === 200 ? '(200 OK)' : '(!!! ' + newLogin.status + ')'}`);
+  assert.strictEqual(newLogin.status, 200);
+
+  const oldLogin = await call('POST', '/api/auth/login', null, { username: 'jane', password: 'Password123' });
+  console.log(`Old password rejected          -> ${oldLogin.status} ${oldLogin.status === 401 ? '(401 OK)' : '(!!! ' + oldLogin.status + ')'}`);
+  assert.strictEqual(oldLogin.status, 401);
+
+  const reuse = await call('POST', '/api/auth/reset-password', null, { token: rawToken, password: 'Another12345' });
+  console.log(`Reset token is single use      -> ${reuse.status} ${reuse.status === 400 ? '(400 OK)' : '(!!! ' + reuse.status + ')'}`);
+  assert.strictEqual(reuse.status, 400);
+
+  // --- Outlet GPS coordinates ---------------------------------------------
+  // The outlet write validator requires the core identity fields, so a GPS
+  // update carries them alongside the coordinates.
+  const gpsWrite = await call('PUT', `/api/outlets/${outletId}`, insp, {
+    outletName: 'Kisumu Agrovet',
+    outletType: 'AGROVET',
+    ownerName: 'Otieno',
+    latitude: '-1.2921',
+    longitude: '36.8219',
+    locationSource: 'GPS',
+  });
+  console.log(`Outlet GPS coordinates stored  -> ${gpsWrite.status} ${gpsWrite.status === 200 ? '(200 OK)' : '(!!! ' + gpsWrite.status + ')'}`);
+  assert.strictEqual(gpsWrite.status, 200);
+  assert.strictEqual(gpsWrite.json.item.latitude, '-1.2921');
+  assert.strictEqual(gpsWrite.json.item.locationSource, 'GPS');
+
+  const badLat = await call('PUT', `/api/outlets/${outletId}`, insp, {
+    outletName: 'Kisumu Agrovet',
+    outletType: 'AGROVET',
+    ownerName: 'Otieno',
+    latitude: '999',
+    longitude: '36.8',
+  });
+  console.log(`Out-of-range latitude rejected -> ${badLat.status} ${badLat.status === 400 ? '(400 OK)' : '(!!! ' + badLat.status + ')'}`);
+  assert.strictEqual(badLat.status, 400);
+
+  const badLon = await call('PUT', `/api/outlets/${outletId}`, insp, {
+    outletName: 'Kisumu Agrovet',
+    outletType: 'AGROVET',
+    ownerName: 'Otieno',
+    latitude: '-1.29',
+    longitude: '400',
+  });
+  console.log(`Out-of-range longitude rejected-> ${badLon.status} ${badLon.status === 400 ? '(400 OK)' : '(!!! ' + badLon.status + ')'}`);
+  assert.strictEqual(badLon.status, 400);
+
   server.close();
   await mongoose.disconnect();
   await mongod.stop();

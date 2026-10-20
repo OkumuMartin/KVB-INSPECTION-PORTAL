@@ -4,16 +4,19 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '../../context/AuthContext';
+import { extractError } from '../../lib/errors';
 import { KvbLogoSmall } from '../../components/KvbLogo';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login } = useAuth();
+  const { login, isLoggingIn } = useAuth();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [registered, setRegistered] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -23,16 +26,30 @@ export default function LoginPage() {
     const dateStr = `${dayNames[today.getDay()]}, ${today.getDate()} ${monthNames[today.getMonth()]} ${today.getFullYear()}`;
     const dateEl = document.querySelector('.kvb-date-text');
     if (dateEl) dateEl.textContent = dateStr;
+
+    // Registered users arrive back from /register with ?registered=1
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('registered') === '1') {
+      setRegistered(true);
+    }
   }, []);
+
+  // The button shows a spinner from the first keystroke onward so the user
+  // never sees an idle form while the request is in flight.
+  const busy = submitting || isLoggingIn;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (busy) return;
     setError('');
+    setSubmitting(true);
     try {
       await login(username, password);
       router.push('/dashboard');
     } catch (err) {
-      setError(err.message || 'Invalid credentials');
+      setError(extractError(err).message);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -84,7 +101,7 @@ export default function LoginPage() {
 
               <div className="kvb-services-merged">
                 <div className="kvb-services-title">
-                  <i className="fa fa-shield-alt kvb-service-icon"></i>
+                  <i className="fa fa-shield-alt kvb-services-shield"></i>
                   Inspection Services
                 </div>
                 <div className="kvb-services-grid">
@@ -137,6 +154,15 @@ export default function LoginPage() {
 
           <form id="login-form" className="kvb-form" onSubmit={handleSubmit} autoComplete="off">
             <div className="kvb-form-body">
+              {registered && (
+                <div className="kvb-form-note">
+                  <i className="fa fa-circle-check"></i>
+                  <span>
+                    Your account was created successfully. Sign in below to continue.
+                  </span>
+                </div>
+              )}
+
               {error && (
                 <div className="kvb-form-error">
                   <i className="fa fa-circle-exclamation"></i> {error}
@@ -202,9 +228,18 @@ export default function LoginPage() {
                 </a>
               </div>
 
-              <button type="submit" className="kvb-btn kvb-btn-primary">
-                <span className="btn-text">Sign in to portal</span>
-                <i className="fa fa-arrow-right-to-bracket"></i>
+              <button type="submit" className="kvb-btn kvb-btn-primary" disabled={busy}>
+                {busy ? (
+                  <>
+                    <i className="fa fa-circle-notch fa-spin"></i>
+                    <span className="btn-text">Signing in...</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="btn-text">Sign in to portal</span>
+                    <i className="fa fa-arrow-right-to-bracket"></i>
+                  </>
+                )}
               </button>
 
               <a className="kvb-btn kvb-btn-outline" href="/register">

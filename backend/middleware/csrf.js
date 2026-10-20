@@ -71,12 +71,21 @@ function attachCsrfToken(req, res, next) {
       httpOnly: false,
       secure: process.env.NODE_ENV === 'production',
       sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      // CHIPS partitioning keeps the cookie working in third-party contexts
+      // (Vercel -> Render) alongside the session cookie.
+      partitioned: process.env.NODE_ENV === 'production',
       maxAge: 8 * 60 * 60 * 1000,
     });
     res.locals.csrfToken = token;
   } else {
     res.locals.csrfToken = existing;
   }
+
+  // Echo the authoritative token on every response. The browser client reads
+  // this header and keeps its copy in sync, so a lost or rotated cookie can
+  // never produce a "CSRF token mismatch" on the next state-changing request.
+  res.setHeader('X-CSRF-Token', res.locals.csrfToken);
+
   next();
 }
 

@@ -20,6 +20,12 @@ dotenv.config();
 
 const app = express();
 
+// Render (and most PaaS providers) terminate TLS at a reverse proxy and forward
+// the real client IP in X-Forwarded-For. Without this, express-rate-limit keys
+// every request by the proxy's shared IP, so the entire user base shares one
+// bucket and the API returns "Too many requests" for everyone at once.
+app.set('trust proxy', 1);
+
 const allowedOrigins = [
   'http://localhost:5173',
   'http://127.0.0.1:5173',
@@ -40,6 +46,9 @@ app.use(
       }
     },
     credentials: true,
+    // The CSRF token is delivered in this header so the browser client can
+    // keep its copy in sync with the server's double-submit cookie.
+    exposedHeaders: ['X-CSRF-Token'],
   }),
 );
 
@@ -64,10 +73,20 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
-// Cache-Control headers for read-only GET endpoints
+// Cache-Control headers for read-only GET endpoints. Session-scoped and
+// user-specific payloads are never cached, otherwise a client could keep
+// reading a stale identity after logout or a role change.
+const NO_CACHE_PREFIXES = ['/api/auth', '/api/users', '/api/email-logs'];
 app.use((req, res, next) => {
   if (req.method === 'GET' && req.path.startsWith('/api/')) {
-    res.set('Cache-Control', 'private, max-age=60, stale-while-revalidate=120');
+    const isUserScoped = NO_CACHE_PREFIXES.some(
+      (prefix) => req.path === prefix || req.path.startsWith(prefix + '/'),
+    );
+    if (!isUserScoped) {
+      res.set('Cache-Control', 'private, max-age=60, stale-while-revalidate=120');
+    } else {
+      res.set('Cache-Control', 'no-store');
+    }
   }
   next();
 });
@@ -89,29 +108,37 @@ app.use(attachCsrfToken);
 // Apply CSRF protection to state-changing requests
 app.use(csrfProtection);
 
-const authLimiter = rateLimit({
+// Rate limits are generous by default so a busy office, a demo, or a shared
+// NAT never locks legitimate users out. They can be tightened with env vars
+// without a code change.
+const AUTH_RATE_LIMIT = parseInt(process.env.RATE_LIMIT_AUTH, 10) || (process.env.NODE_ENV === 'production' ? 100 : 1000);
+const API_RATE_LIMIT = parseInt(process.env.RATE_LIMIT_API, 10) || (process.env.NODE_ENV === 'production' ? 1000 : 10000);
+const EXPORT_RATE_LIMIT = parseInt(process.env.RATE_LIMIT_EXPORT, 10) || 30;
+
+const rateLimitOptions = {
   windowMs: 15 * 60 * 1000,
-  max: process.env.NODE_ENV === 'production' ? 25 : 1000,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { message: 'Too many requests. Please try again later.' },
+  message: { success: false, message: 'Too many requests. Please wait a moment and try again.' },
+};
+
+const authLimiter = rateLimit({
+  ...rateLimitOptions,
+  max: AUTH_RATE_LIMIT,
+  // Only failed attempts count towards the limit. A legitimate user signing in
+  // repeatedly (or a shared IP) must never be throttled out of the portal.
+  skipSuccessfulRequests: true,
 });
 
 const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 300,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { message: 'Too many requests. Please try again later.' },
+  ...rateLimitOptions,
+  max: API_RATE_LIMIT,
 });
 
 // Stricter rate limit for export endpoints (CPU-intensive)
 const exportLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 20,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { message: 'Export rate limit exceeded. Please try again later.' },
+  ...rateLimitOptions,
+  max: EXPORT_RATE_LIMIT,
 });
 
 app.use('/api/auth', authLimiter, authRoutes);

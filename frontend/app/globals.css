@@ -576,6 +576,23 @@
   color: var(--kvb-gold);
 }
 
+/* The section shield is a bare glyph, not the 26px icon box used by the
+   individual service rows. Give it its own sizing so it can never collide
+   with the heading text. */
+.kvb-services-shield {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  font-size: 1rem;
+  border-radius: 10px;
+  background: rgba(212, 175, 55, 0.16);
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  line-height: 1;
+}
+
 .kvb-services-grid {
   display: grid;
   gap: 12px;
@@ -740,6 +757,113 @@
   border-radius: 12px;
   font-size: 0.9rem;
   margin-bottom: 16px;
+}
+
+/* Inline informational callout (neutral / success / dev) */
+.kvb-form-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 16px;
+  background: rgba(15, 107, 62, 0.07);
+  border: 1px solid rgba(15, 107, 62, 0.22);
+  color: #14532d;
+  border-radius: 12px;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  margin-bottom: 16px;
+}
+
+.kvb-form-note i {
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.kvb-form-note a {
+  color: var(--kvb-green);
+  font-weight: 600;
+}
+
+.kvb-form-note-dev {
+  background: rgba(212, 175, 55, 0.12);
+  border-color: rgba(212, 175, 55, 0.45);
+  color: #6b4e12;
+}
+
+/* Success panel used after a completed recovery / registration action */
+.kvb-form-success {
+  text-align: center;
+  padding: 18px 12px 22px;
+  margin-bottom: 18px;
+}
+
+.kvb-form-success > i {
+  font-size: 2.6rem;
+  color: var(--kvb-green);
+  display: block;
+  margin-bottom: 12px;
+}
+
+.kvb-form-success h3 {
+  margin: 0 0 8px;
+  font-size: 1.12rem;
+  color: #102a43;
+}
+
+.kvb-form-success p {
+  margin: 0 0 8px;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: #4b5563;
+}
+
+.kvb-form-success .kvb-form-note {
+  text-align: left;
+  margin: 14px 0 0;
+}
+
+/* Password strength meter */
+.kvb-password-strength {
+  margin: -8px 0 20px;
+}
+
+.kvb-password-bars {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.kvb-password-bar {
+  flex: 1;
+  height: 5px;
+  border-radius: 99px;
+  background: #e5e7eb;
+  transition: background 0.25s ease;
+}
+
+.kvb-password-bar.active.level-1 { background: #dc2626; }
+.kvb-password-bar.active.level-2 { background: #d4af37; }
+.kvb-password-bar.active.level-3 { background: #16a34a; }
+
+.kvb-password-checks {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.kvb-password-checks li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.kvb-password-checks li.ok {
+  color: #15803d;
 }
 
 .kvb-field {
@@ -913,10 +1037,11 @@
 }
 
 .kvb-btn-primary:disabled {
-  opacity: 0.8;
-  cursor: default;
+  opacity: 0.75;
+  cursor: not-allowed;
   transform: none;
   box-shadow: 0 8px 22px rgba(26, 123, 50, 0.35);
+  pointer-events: none;
 }
 
 .kvb-btn-outline {

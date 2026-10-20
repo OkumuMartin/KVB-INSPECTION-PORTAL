@@ -109,6 +109,34 @@ export const OUTLET_TYPE_OPTIONS = [
   { value: 'OTHER', label: 'Others' },
 ];
 
+/**
+ * Section 4(i) of the KVB questionnaire asks for the owner's "Level of
+ * Training in Animal Health". The paper form offers a fixed set, so the
+ * portal presents a dropdown. The backend serves the authoritative list via
+ * GET /api/inspection-form/schema; this is the offline fallback.
+ */
+export const FALLBACK_TRAINING_LEVELS = [
+  'Certificate in Animal Health',
+  'Diploma in Animal Health',
+  'Degree in Animal Health',
+  'No Formal Training',
+];
+
+/**
+ * Build the option list for the training-level dropdown. A record saved
+ * before the dropdown existed may carry a free-text qualification; that value
+ * is appended so it is displayed and preserved instead of silently becoming
+ * blank on the next save.
+ */
+export function trainingLevelOptions(trainingLevels = FALLBACK_TRAINING_LEVELS, currentValue = '') {
+  const options = [...(trainingLevels || [])];
+  const current = String(currentValue || '').trim();
+  if (current && !options.some((option) => option.toLowerCase() === current.toLowerCase())) {
+    options.push(current);
+  }
+  return options;
+}
+
 export const MAX_ATTENDANTS = 10;
 export const LIMITS = {
   nameMax: 150,
@@ -280,76 +308,58 @@ export function summarizeFindings(formData, sections = FALLBACK_FINDING_SECTIONS
 export function collectStepErrors({ step, formData, outletId, inspectionDate, sections = FALLBACK_FINDING_SECTIONS }) {
   const errors = {};
 
-  const setError = (field, message) => {
-    errors[field] = message;
+  const context = { outletId, inspectionDate };
+
+  const check = (path) => {
+    const message = validateFieldPath(path, formData, context);
+    if (message) errors[path] = message;
   };
 
   if (step === 'inspection') {
-    if (!inspectionDate) setError('inspectionDate', 'Inspection date is required.');
+    check('inspectionDate');
   }
 
   if (step === 'outlet') {
-    if (!outletId) setError('outlet', 'Select the outlet being inspected.');
-    if (!formData.outletInformation.outletName.trim()) {
-      setError('formData.outletInformation.outletName', 'Name of outlet is required.');
-    }
-    if (!formData.outletInformation.outletType) {
-      setError('formData.outletInformation.outletType', 'Type of outlet is required.');
-    }
-    if (formData.outletInformation.outletType === 'OTHER' && !formData.outletInformation.otherType.trim()) {
-      setError('formData.outletInformation.otherType', 'Specify the other outlet type.');
-    }
-    if (!formData.outletInformation.county) setError('formData.outletInformation.county', 'County is required.');
-    if (!formData.outletInformation.subCounty) {
-      setError('formData.outletInformation.subCounty', 'Sub-county is required.');
-    }
+    check('outlet');
+    check('formData.outletInformation.outletName');
+    check('formData.outletInformation.outletType');
+    check('formData.outletInformation.otherType');
+    check('formData.outletInformation.county');
+    check('formData.outletInformation.subCounty');
+    check('formData.location.latitude');
+    check('formData.location.longitude');
   }
 
   if (step === 'owner') {
-    if (!formData.ownerInformation.ownerName.trim()) {
-      setError('formData.ownerInformation.ownerName', "Owner's name is required.");
-    }
-    const phoneError = validateTelephone(formData.ownerInformation.telephone);
-    if (phoneError) setError('formData.ownerInformation.telephone', phoneError);
+    check('formData.ownerInformation.ownerName');
+    check('formData.ownerInformation.telephone');
+    check('formData.ownerInformation.trainingLevel');
   }
 
   if (step === 'attendants') {
     formData.attendants.forEach((attendant, index) => {
       const hasContent = attendant.name.trim() || attendant.telephone.trim() || attendant.kvbStatus.registrationNumber.trim();
       if (!hasContent) return;
-      if (!attendant.name.trim()) {
-        setError(`formData.attendants.${index}.name`, 'Enter the attendant name or clear this row.');
-      }
-      const phoneError = validateTelephone(attendant.telephone);
-      if (phoneError) setError(`formData.attendants.${index}.telephone`, phoneError);
+      check(`formData.attendants.${index}.name`);
+      check(`formData.attendants.${index}.telephone`);
     });
   }
 
   if (step === 'products') {
-    const { otherProducts } = formData.products;
-    if (otherProducts.others && !otherProducts.otherDescription.trim()) {
-      setError('formData.products.otherProducts.otherDescription', 'Describe the other products stocked.');
-    }
+    check('formData.products.otherProducts.otherDescription');
   }
 
   if (step === 'findings') {
     sections.forEach((section) => {
       section.items.forEach((item) => {
-        const finding = getFinding(formData, section.key, item.key);
-        if (finding.status === 'NOT_ASSESSED') {
-          setError(`formData.findings.${section.key}.${item.key}`, 'Assess this item before continuing.');
-        }
+        check(`formData.findings.${section.key}.${item.key}`);
       });
     });
   }
 
   if (step === 'signoff') {
-    if (!formData.signOff.inspector.name.trim()) {
-      setError('formData.signOff.inspector.name', 'Inspector name is required.');
-    }
-    if (!formData.signOff.inspector.date) {
-      setError('formData.signOff.inspector.date', 'Inspector sign-off date is required.');
-    }
+    check('formData.signOff.inspector.name');
+    check('formData.signOff.inspector.date');
   }
 
   return errors;
@@ -362,6 +372,143 @@ export function validateTelephone(value) {
   const isMobile = /^(\+?254|0)?[17]\d{8}$/.test(compact);
   const isLandline = /^(\+?254|0)[2-9]\d{8}$/.test(compact);
   if (!isMobile && !isLandline) return 'Enter a valid Kenyan number, for example +254712345678.';
+  return null;
+}
+
+/**
+ * Validate a single field and return an error message, or null when the
+ * value is acceptable.
+ *
+ * This is the single source of truth for field-level rules. `collectStepErrors`
+ * uses it to build the error map for a whole step, and the form hook calls it
+ * on every keystroke so an error disappears the instant the user fixes the
+ * field (and reappears if they break it again).
+ */
+export function validateFieldPath(path, formData = {}, context = {}) {
+  const outlet = formData.outletInformation || {};
+  const owner = formData.ownerInformation || {};
+  const location = formData.location || {};
+  const products = formData.products || {};
+  const signOff = formData.signOff || {};
+  const findings = formData.findings || {};
+
+  switch (path) {
+    case 'inspectionDate':
+      return context.inspectionDate ? null : 'Inspection date is required.';
+
+    case 'outlet':
+      return context.outletId ? null : 'Select the outlet being inspected.';
+
+    case 'formData.outletInformation.outletName': {
+      const value = (outlet.outletName || '').trim();
+      if (!value) return 'Name of outlet is required.';
+      if (value.length < 2) return 'Must be at least 2 characters.';
+      if (value.length > LIMITS.nameMax) return `Must not exceed ${LIMITS.nameMax} characters.`;
+      return null;
+    }
+
+    case 'formData.outletInformation.outletType':
+      return outlet.outletType ? null : 'Type of outlet is required.';
+
+    case 'formData.outletInformation.otherType':
+      if (outlet.outletType !== 'OTHER') return null;
+      return (outlet.otherType || '').trim()
+        ? null
+        : 'Specify the other outlet type.';
+
+    case 'formData.outletInformation.county':
+      return outlet.county ? null : 'County is required.';
+
+    case 'formData.outletInformation.subCounty':
+      return outlet.subCounty ? null : 'Sub-county is required.';
+
+    case 'formData.ownerInformation.ownerName': {
+      const value = (owner.ownerName || '').trim();
+      if (!value) return "Owner's name is required.";
+      if (value.length < 2) return 'Must be at least 2 characters.';
+      if (value.length > LIMITS.nameMax) return `Must not exceed ${LIMITS.nameMax} characters.`;
+      return null;
+    }
+
+    case 'formData.ownerInformation.telephone':
+      return validateTelephone(owner.telephone);
+
+    case 'formData.ownerInformation.trainingLevel': {
+      const value = (owner.trainingLevel || '').trim();
+      if (!value) return null;
+      if (value.length > LIMITS.trainingLevelMax) {
+        return `Must not exceed ${LIMITS.trainingLevelMax} characters.`;
+      }
+      return null;
+    }
+
+    case 'formData.location.latitude': {
+      const value = (location.latitude || '').trim();
+      if (!value) return null;
+      const parsed = Number(value);
+      if (!Number.isFinite(parsed)) return 'Latitude must be a number.';
+      if (parsed < -90 || parsed > 90) return 'Latitude must be between -90 and 90.';
+      return null;
+    }
+
+    case 'formData.location.longitude': {
+      const value = (location.longitude || '').trim();
+      if (!value) return null;
+      const parsed = Number(value);
+      if (!Number.isFinite(parsed)) return 'Longitude must be a number.';
+      if (parsed < -180 || parsed > 180) return 'Longitude must be between -180 and 180.';
+      return null;
+    }
+
+    case 'formData.products.otherProducts.otherDescription': {
+      const others = (products.otherProducts || {}).others;
+      if (!others) return null;
+      return (products.otherProducts || {}).otherDescription?.trim()
+        ? null
+        : 'Describe the other products stocked.';
+    }
+
+    case 'formData.signOff.inspector.name':
+      return (signOff.inspector || {}).name?.trim() ? null : 'Inspector name is required.';
+
+    case 'formData.signOff.inspector.date':
+      return (signOff.inspector || {}).date ? null : 'Inspector sign-off date is required.';
+
+    default:
+      break;
+  }
+
+  // formData.attendants.<index>.<field>
+  const attendantMatch = /^formData\.attendants\.(\d+)\.(name|telephone)$/.exec(path);
+  if (attendantMatch) {
+    const index = Number(attendantMatch[1]);
+    const field = attendantMatch[2];
+    const attendant = (formData.attendants || [])[index] || {};
+    const hasContent =
+      (attendant.name || '').trim() ||
+      (attendant.telephone || '').trim() ||
+      ((attendant.kvbStatus || {}).registrationNumber || '').trim();
+
+    if (field === 'name') {
+      if (!hasContent) return null;
+      return (attendant.name || '').trim() ? null : 'Enter the attendant name or clear this row.';
+    }
+    if (!hasContent) return null;
+    return validateTelephone(attendant.telephone);
+  }
+
+  // formData.findings.<sectionKey>.<itemKey>
+  if (path.startsWith('formData.findings.')) {
+    const rest = path.slice('formData.findings.'.length);
+    const dot = rest.indexOf('.');
+    if (dot > 0) {
+      const sectionKey = rest.slice(0, dot);
+      const itemKey = rest.slice(dot + 1);
+      const status = ((findings[sectionKey] || {})[itemKey] || {}).status;
+      return status && status !== 'NOT_ASSESSED' ? null : 'Assess this item before continuing.';
+    }
+  }
+
   return null;
 }
 

@@ -6,6 +6,14 @@ import { LIMITS } from '../../lib/inspectionForm';
 import api from '../../lib/api';
 import { useState, useEffect, useCallback } from 'react';
 
+const GPS_SOURCE = 'GPS';
+
+function roundCoordinate(value) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return '';
+  return String(Number(parsed.toFixed(7)));
+}
+
 export default function OutletDetailsStep({
   formData,
   errors,
@@ -24,6 +32,7 @@ export default function OutletDetailsStep({
   const [isCreating, setIsCreating] = useState(false);
   const [gpsStatus, setGpsStatus] = useState('idle');
   const [gpsError, setGpsError] = useState('');
+  const [gpsAccuracy, setGpsAccuracy] = useState(null);
   const [formOutletName, setFormOutletName] = useState('');
   const [formOwnerName, setFormOwnerName] = useState('');
   const [formCounty, setFormCounty] = useState('');
@@ -47,6 +56,42 @@ export default function OutletDetailsStep({
     }
   }, [selectedOutletId]);
 
+  // Store a freshly captured fix on the outlet record as well as on the
+  // inspection, so the outlet's map position reflects where the inspector
+  // actually found the premises.
+  const persistGpsToOutlet = useCallback(
+    async (latitude, longitude) => {
+      if (!selectedOutletId || selectedOutletId === '__new__') return;
+      try {
+        await api.put(`/outlets/${selectedOutletId}`, {
+          latitude,
+          longitude,
+          locationSource: GPS_SOURCE,
+        });
+      } catch (error) {
+        // A failed position update must not block the inspection itself.
+        console.warn('Could not store GPS coordinates on the outlet record:', error.message);
+      }
+    },
+    [selectedOutletId],
+  );
+
+  // Apply a device fix to the form and mirror it onto the outlet record.
+  const applyGpsFix = useCallback(
+    (position) => {
+      const latitude = roundCoordinate(position.coords.latitude);
+      const longitude = roundCoordinate(position.coords.longitude);
+      onLocationChange('latitude', latitude);
+      onLocationChange('longitude', longitude);
+      onLocationChange('capturedAt', new Date(position.timestamp || Date.now()).toISOString());
+      setGpsAccuracy(
+        Number.isFinite(position.coords.accuracy) ? Math.round(position.coords.accuracy) : null,
+      );
+      persistGpsToOutlet(latitude, longitude);
+    },
+    [onLocationChange, persistGpsToOutlet],
+  );
+
   const captureLocation = useCallback(() => {
     if (!navigator.geolocation) {
       setGpsStatus('error');
@@ -57,8 +102,7 @@ export default function OutletDetailsStep({
     setGpsError('');
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        onLocationChange('latitude', String(position.coords.latitude));
-        onLocationChange('longitude', String(position.coords.longitude));
+        applyGpsFix(position);
         setGpsStatus('success');
         setGpsError('');
       },
@@ -101,8 +145,7 @@ export default function OutletDetailsStep({
       setGpsError('');
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          onLocationChange('latitude', String(position.coords.latitude));
-          onLocationChange('longitude', String(position.coords.longitude));
+          applyGpsFix(position);
           setGpsStatus('success');
           setGpsError('');
         },
@@ -122,7 +165,7 @@ export default function OutletDetailsStep({
         { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
       );
     }
-  }, [isCreating, formOutletName, formCounty, formSubCounty, location.latitude, location.longitude, outletInformation.outletName, outletInformation.county, outletInformation.subCounty, onLocationChange]);
+  }, [isCreating, formOutletName, formCounty, formSubCounty, location.latitude, location.longitude, outletInformation.outletName, outletInformation.county, outletInformation.subCounty, applyGpsFix]);
 
   // Auto-trigger GPS capture once Agrovet name, County, and Sub-county are provided.
   useEffect(() => {
@@ -154,14 +197,24 @@ export default function OutletDetailsStep({
   const handleCreateOutlet = useCallback(async () => {
     setGpsError('');
     try {
-      const { data } = await api.post('/outlets', {
+      const payload = {
         outletName: formOutletName,
         outletType: formOutletType,
         ownerName: formOwnerName,
         county: formCounty,
         subCounty: formSubCounty,
         centre: formCentre,
-      });
+      };
+
+      // A device fix is more accurate than the geocoded position, so the
+      // captured coordinates are stored on the new outlet record.
+      if (location.latitude && location.longitude) {
+        payload.latitude = location.latitude;
+        payload.longitude = location.longitude;
+        payload.locationSource = GPS_SOURCE;
+      }
+
+      const { data } = await api.post('/outlets', payload);
       const newOutlet = data.item || data;
       if (newOutlet?._id) {
         onSelectOutlet(newOutlet._id);
@@ -180,7 +233,27 @@ export default function OutletDetailsStep({
     } catch (error) {
       setGpsError(error.response?.data?.message || 'Failed to create outlet.');
     }
-  }, [formOutletName, formOwnerName, formCounty, formSubCounty, formCentre, formOutletType, onSelectOutlet, onOutletCreated]);
+  }, [formOutletName, formOwnerName, formCounty, formSubCounty, formCentre, formOutletType, location.latitude, location.longitude, onSelectOutlet, onOutletCreated]);
+
+  // Shows when the coordinates were captured and how accurate the fix was,
+  // so an inspector can judge whether a manual correction is needed.
+  const gpsMeta = (location.capturedAt || gpsAccuracy !== null) && !readOnly ? (
+    <div className="inspection-field-hint gps-meta">
+      <i className="fa fa-clock" aria-hidden="true" />
+      <span>
+        {location.capturedAt && (
+          <>
+            Captured {new Date(location.capturedAt).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' })}
+          </>
+        )}
+        {gpsAccuracy !== null && (
+          <>
+            {location.capturedAt ? ' · ' : ''}Accuracy ±{gpsAccuracy} m
+          </>
+        )}
+      </span>
+    </div>
+  ) : null;
 
   return (
     <FormSection number="2" title="Outlet Details" description="Identify the veterinary inputs outlet being inspected.">
@@ -302,27 +375,41 @@ export default function OutletDetailsStep({
               />
             </FormField>
 
-            <FormField id="latitude" label="Latitude">
+            <FormField
+              id="latitude"
+              label="Latitude"
+              error={errors['formData.location.latitude']}
+            >
               <input
                 id="latitude"
                 type="text"
+                inputMode="decimal"
                 value={location.latitude}
                 onChange={(event) => onLocationChange('latitude', event.target.value)}
                 disabled={readOnly}
                 placeholder="e.g. -1.2921"
+                aria-invalid={Boolean(errors['formData.location.latitude'])}
               />
             </FormField>
 
-            <FormField id="longitude" label="Longitude">
+            <FormField
+              id="longitude"
+              label="Longitude"
+              error={errors['formData.location.longitude']}
+            >
               <input
                 id="longitude"
                 type="text"
+                inputMode="decimal"
                 value={location.longitude}
                 onChange={(event) => onLocationChange('longitude', event.target.value)}
                 disabled={readOnly}
                 placeholder="e.g. 36.8219"
+                aria-invalid={Boolean(errors['formData.location.longitude'])}
               />
             </FormField>
+
+            {gpsMeta}
 
             {!readOnly && (
               <div className="inspection-new-outlet-actions">
@@ -460,27 +547,41 @@ export default function OutletDetailsStep({
               />
             </FormField>
 
-            <FormField id="latitude" label="Latitude">
+            <FormField
+              id="latitude"
+              label="Latitude"
+              error={errors['formData.location.latitude']}
+            >
               <input
                 id="latitude"
                 type="text"
+                inputMode="decimal"
                 value={location.latitude}
                 onChange={(event) => onLocationChange('latitude', event.target.value)}
                 disabled={readOnly}
                 placeholder="e.g. -1.2921"
+                aria-invalid={Boolean(errors['formData.location.latitude'])}
               />
             </FormField>
 
-            <FormField id="longitude" label="Longitude">
+            <FormField
+              id="longitude"
+              label="Longitude"
+              error={errors['formData.location.longitude']}
+            >
               <input
                 id="longitude"
                 type="text"
+                inputMode="decimal"
                 value={location.longitude}
                 onChange={(event) => onLocationChange('longitude', event.target.value)}
                 disabled={readOnly}
                 placeholder="e.g. 36.8219"
+                aria-invalid={Boolean(errors['formData.location.longitude'])}
               />
             </FormField>
+
+            {gpsMeta}
 
             {!readOnly && (
               <div className="inspection-form-actions">

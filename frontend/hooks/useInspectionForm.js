@@ -5,6 +5,7 @@ import {
   createEmptyFormData,
   mergeFormData,
   STEPS,
+  validateFieldPath,
 } from '../lib/inspectionForm';
 
 const emptyAttendant = () => ({
@@ -33,26 +34,47 @@ export function useInspectionForm({ initialFormData, initialOutletId = '', initi
 
   const step = STEPS[currentStep].id;
 
+  /**
+   * Re-check every field that currently shows an error whenever the form
+   * data changes.
+   *
+   * An error is removed the instant the value becomes valid and re-added the
+   * moment it becomes invalid again. Only fields that already have an error
+   * are re-checked, so a field the user has not visited yet is never flagged.
+   */
+  useEffect(() => {
+    setErrors((prev) => {
+      const paths = Object.keys(prev);
+      if (paths.length === 0) return prev;
+
+      let changed = false;
+      const next = { ...prev };
+      for (const path of paths) {
+        const message = validateFieldPath(path, formData, { outletId, inspectionDate });
+        if (message) {
+          if (next[path] !== message) {
+            next[path] = message;
+            changed = true;
+          }
+        } else {
+          delete next[path];
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, [formData, outletId, inspectionDate]);
+
   const updateOutletField = useCallback((field, value) => {
     setFormData((prev) => {
       const outletInformation = { ...prev.outletInformation, [field]: value };
       if (field === 'county') outletInformation.subCounty = '';
       return { ...prev, outletInformation };
     });
-    setErrors((prev) => {
-      const next = { ...prev };
-      delete next[`formData.outletInformation.${field}`];
-      return next;
-    });
   }, []);
 
   const updateOwnerField = useCallback((field, value) => {
     setFormData((prev) => ({ ...prev, ownerInformation: { ...prev.ownerInformation, [field]: value } }));
-    setErrors((prev) => {
-      const next = { ...prev };
-      delete next[`formData.ownerInformation.${field}`];
-      return next;
-    });
   }, []);
 
   const updateOwnerKvbStatus = useCallback((field, value) => {
@@ -125,11 +147,6 @@ export function useInspectionForm({ initialFormData, initialOutletId = '', initi
       };
       return next;
     });
-    setErrors((prev) => {
-      const next = { ...prev };
-      delete next[`formData.findings.${sectionKey}.${itemKey}.${field}`];
-      return next;
-    });
   }, []);
 
   const setOtherComments = useCallback((value) => {
@@ -141,12 +158,6 @@ export function useInspectionForm({ initialFormData, initialOutletId = '', initi
       ...prev,
       signOff: { ...prev.signOff, [party]: { ...prev.signOff[party], ...patch } },
     }));
-    setErrors((prev) => {
-      const next = { ...prev };
-      delete next[`formData.signOff.${party}.name`];
-      delete next[`formData.signOff.${party}.date`];
-      return next;
-    });
   }, []);
 
   const setLocationField = useCallback((field, value) => {

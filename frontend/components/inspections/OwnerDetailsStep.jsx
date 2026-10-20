@@ -1,12 +1,19 @@
 'use client';
 
 import { Checkbox, FormField, FormSection } from './FormField';
-import { LIMITS } from '../../lib/inspectionForm';
+import { LIMITS, FALLBACK_TRAINING_LEVELS, trainingLevelOptions } from '../../lib/inspectionForm';
 
 const CURRENT_YEAR = new Date().getFullYear();
 const YEAR_OPTIONS = Array.from({ length: CURRENT_YEAR - 1999 }, (_, i) => CURRENT_YEAR - i);
 
-export default function OwnerDetailsStep({ formData, errors, onChange, onKvbChange, readOnly }) {
+export default function OwnerDetailsStep({
+  formData,
+  errors,
+  onChange,
+  onKvbChange,
+  readOnly,
+  trainingLevels = FALLBACK_TRAINING_LEVELS,
+}) {
   const { ownerInformation, kvbStatus } = formData;
 
   return (
@@ -49,16 +56,27 @@ export default function OwnerDetailsStep({ formData, errors, onChange, onKvbChan
           />
         </FormField>
 
-        <FormField id="trainingLevel" label="Level of Training in Animal Health" full>
-          <input
+        <FormField
+          id="trainingLevel"
+          label="Level of Training in Animal Health"
+          hint="Select the highest qualification held by the owner."
+          error={errors['formData.ownerInformation.trainingLevel']}
+          full
+        >
+          <select
             id="trainingLevel"
-            type="text"
             value={ownerInformation.trainingLevel}
             onChange={(event) => onChange('trainingLevel', event.target.value)}
             disabled={readOnly}
             maxLength={LIMITS.trainingLevelMax}
-            placeholder="e.g. Certificate in Animal Health"
-          />
+            className="inspection-select"
+            aria-invalid={Boolean(errors['formData.ownerInformation.trainingLevel'])}
+          >
+            <option value="">Select level of training</option>
+            {trainingLevelOptions(trainingLevels, ownerInformation.trainingLevel).map((level) => (
+              <option key={level} value={level}>{level}</option>
+            ))}
+          </select>
         </FormField>
 
         <FormField id="ownerAddress" label="Address" full>

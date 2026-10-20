@@ -6,6 +6,7 @@ import {
   FALLBACK_FINDING_SECTIONS,
   FALLBACK_FINDING_STATUSES,
   OUTLET_TYPE_OPTIONS,
+  FALLBACK_TRAINING_LEVELS,
   LIMITS,
   MAX_ATTENDANTS,
 } from '../lib/inspectionForm';
@@ -25,6 +26,7 @@ export function useInspectionFormSchema() {
     findingSections: data?.findingSections || FALLBACK_FINDING_SECTIONS,
     findingStatuses: data?.findingStatuses || FALLBACK_FINDING_STATUSES,
     outletTypes: data?.outletTypes || OUTLET_TYPE_OPTIONS,
+    trainingLevels: data?.trainingLevels || FALLBACK_TRAINING_LEVELS,
     productGroups: data?.productGroups,
     submissionRequirements: data?.submissionRequirements,
     maxAttendants: data?.maxAttendants || MAX_ATTENDANTS,

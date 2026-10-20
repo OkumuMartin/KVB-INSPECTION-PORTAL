@@ -39,7 +39,7 @@ export default function NewInspectionPage() {
   const hydratedRef = useRef(false);
   const draftTimerRef = useRef(null);
 
-  const { findingSections, outletTypes, maxAttendants } = useInspectionFormSchema();
+  const { findingSections, outletTypes, maxAttendants, trainingLevels } = useInspectionFormSchema();
   const saveMutation = useSaveInspection();
   const submitMutation = useSubmitInspection();
 
@@ -279,13 +279,14 @@ export default function NewInspectionPage() {
         );
       case 'owner':
         return (
-          <OwnerDetailsStep
-            formData={formData}
-            errors={errors}
-            onChange={updateOwnerField}
-            onKvbChange={updateOwnerKvbStatus}
-          />
-        );
+      <OwnerDetailsStep
+        formData={formData}
+        errors={errors}
+        onChange={updateOwnerField}
+        onKvbChange={updateOwnerKvbStatus}
+        trainingLevels={trainingLevels}
+      />
+    );
       case 'attendants':
         return (
           <AttendantsStep
@@ -330,6 +331,7 @@ export default function NewInspectionPage() {
             productGroups={productGroups}
             outletTypeLabels={outletTypes}
             outletRecordName={outletRecordName}
+            trainingLevels={trainingLevels}
             updateOutletField={updateOutletField}
             updateOwnerField={updateOwnerField}
             updateOwnerKvbStatus={updateOwnerKvbStatus}

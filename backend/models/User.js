@@ -20,6 +20,10 @@ const userSchema = new mongoose.Schema(
     status: { type: String, required: true, enum: STATUSES, default: 'ACTIVE' },
     phone: { type: String, trim: true },
     designation: { type: String, trim: true },
+    // Hashed password-reset token. Only ever stored as a SHA-256 digest so a
+    // database leak cannot be used to reset a user's password.
+    passwordResetToken: { type: String, select: false },
+    passwordResetExpires: { type: Date, select: false },
   },
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } },
 );

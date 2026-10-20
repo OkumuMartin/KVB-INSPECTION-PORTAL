@@ -41,7 +41,7 @@ export default function InspectionDetailPage() {
   const [exportFormat, setExportFormat] = useState('pdf');
   const hydratedRef = useRef(false);
 
-  const { findingSections, findingStatuses, outletTypes, maxAttendants } = useInspectionFormSchema();
+  const { findingSections, findingStatuses, outletTypes, maxAttendants, trainingLevels } = useInspectionFormSchema();
   const saveMutation = useSaveInspection();
   const submitMutation = useSubmitInspection();
 
@@ -336,6 +336,7 @@ export default function InspectionDetailPage() {
                 productGroups={PRODUCT_GROUPS}
                 outletTypeLabels={outletTypes}
                 outletRecordName={item.outlet?.outletName || ''}
+                trainingLevels={trainingLevels}
               />
             ) : (
               <>
@@ -365,12 +366,13 @@ export default function InspectionDetailPage() {
                 )}
                 {step === 'owner' && (
                   <OwnerDetailsStep
-                    formData={formData}
-                    errors={errors}
-                    onChange={updateOwnerField}
-                    onKvbChange={updateOwnerKvbStatus}
-                  />
-                )}
+                      formData={formData}
+                      errors={errors}
+                      onChange={updateOwnerField}
+                      onKvbChange={updateOwnerKvbStatus}
+                      trainingLevels={trainingLevels}
+                    />
+                  )}
                 {step === 'attendants' && (
                   <AttendantsStep
                     formData={formData}
@@ -414,6 +416,7 @@ export default function InspectionDetailPage() {
                     productGroups={PRODUCT_GROUPS}
                     outletTypeLabels={outletTypes}
                     outletRecordName={item.outlet?.outletName || ''}
+                    trainingLevels={trainingLevels}
                     updateOutletField={updateOutletField}
                     updateOwnerField={updateOwnerField}
                     updateOwnerKvbStatus={updateOwnerKvbStatus}

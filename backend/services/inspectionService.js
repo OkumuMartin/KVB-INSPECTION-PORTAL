@@ -3,6 +3,7 @@ const {
   LIMITS,
   SUBMISSION_REQUIREMENTS,
   COMPLIANT_STATUSES,
+  TRAINING_LEVELS,
   getFindingStatuses,
 } = require('../config/inspectionFormConfig');
 const { OUTLET_TYPES } = require('../models/Outlet');
@@ -112,6 +113,21 @@ function sanitizeFormData(input = {}) {
     return trimmed.slice(0, max);
   };
 
+  /**
+   * The owner training level is a fixed set of four options. Values that
+   * match one of them (ignoring case and spacing) are stored in the canonical
+   * form. Anything else is preserved as free text so an outlet carrying a
+   * legacy qualification string is never silently rewritten.
+   */
+  const normalizeTrainingLevel = (value) => {
+    const cleaned = cleanText(value, LIMITS.trainingLevelMax);
+    if (!cleaned) return '';
+    const match = TRAINING_LEVELS.find(
+      (level) => level.toLowerCase() === cleaned.toLowerCase(),
+    );
+    return match || cleaned;
+  };
+
   const outletInformation = isPlainObject(input.outletInformation) ? input.outletInformation : {};
   const ownerInformation = isPlainObject(input.ownerInformation) ? input.ownerInformation : {};
   const kvbStatus = isPlainObject(input.kvbStatus) ? input.kvbStatus : {};
@@ -184,7 +200,7 @@ function sanitizeFormData(input = {}) {
       ownerName: cleanText(ownerInformation.ownerName, LIMITS.nameMax),
       address: cleanText(ownerInformation.address, LIMITS.addressMax),
       telephone: cleanText(ownerInformation.telephone, 20),
-      trainingLevel: cleanText(ownerInformation.trainingLevel, LIMITS.trainingLevelMax),
+      trainingLevel: normalizeTrainingLevel(ownerInformation.trainingLevel),
       ownerEmail: cleanText(ownerInformation.ownerEmail, 120),
     },
     kvbStatus: {

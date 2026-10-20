@@ -73,6 +73,24 @@ export function AuthProvider({ children }) {
     return loginMutation.mutateAsync({ username, password });
   };
 
+  const register = async (payload) => {
+    await ensureCsrfToken();
+    const res = await api.post('/auth/register', payload);
+    return res.data;
+  };
+
+  const requestPasswordReset = async (email) => {
+    await ensureCsrfToken();
+    const res = await api.post('/auth/forgot-password', { email });
+    return res.data;
+  };
+
+  const resetPassword = async (token, password) => {
+    await ensureCsrfToken();
+    const res = await api.post('/auth/reset-password', { token, password });
+    return res.data;
+  };
+
   const logout = async () => {
     try {
       await logoutMutation.mutateAsync();
@@ -97,9 +115,13 @@ export function AuthProvider({ children }) {
   const value = {
     user: user ?? null,
     loading: userLoading || !clientLoaded,
+    isLoggingIn: loginMutation.isPending,
     login,
     logout,
     refreshUser,
+    register,
+    requestPasswordReset,
+    resetPassword,
   };
 
   return (

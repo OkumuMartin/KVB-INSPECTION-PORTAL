@@ -18,6 +18,12 @@ const WRITABLE_FIELDS = [
   'subCounty',
   'centre',
   'kvbRegistrationInfo',
+  // GPS coordinates captured on site during an inspection. These override the
+  // geocoded position because a device fix is more accurate than an address
+  // lookup.
+  'latitude',
+  'longitude',
+  'locationSource',
 ];
 
 function escapeRegExp(value) {

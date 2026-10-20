@@ -19,9 +19,9 @@ const api = axios.create({
 // The CSRF token lives in a cookie set by attachCsrfToken on every backend
 // response. Because the frontend and backend are cross-site (Vercel vs
 // Render), document.cookie on the frontend page never reflects the
-// backend's csrfToken cookie. Instead we capture the token from the JSON
-// body of GET /csrf-token and hold it in this module-level variable so the
-// request interceptor can echo it back in the x-csrf-token header.
+// backend's csrfToken cookie. Instead we capture the token from the
+// X-CSRF-Token response header and hold it in this module-level variable so
+// the request interceptor can echo it back in the x-csrf-token header.
 let csrfToken: string | null = null;
 
 export function setCsrfToken(token: string | null) {
@@ -47,19 +47,54 @@ api.interceptors.request.use(
   (error) => Promise.reject(error),
 );
 
-// Response interceptor: capture new CSRF tokens from auth responses
+// Response interceptor: keep the CSRF token in sync with the server.
+// The backend echoes the authoritative token in the X-CSRF-Token header on
+// every response. Reading it here guarantees the value we echo back in the
+// request header always matches the server's double-submit cookie, even when
+// the cookie is rotated or dropped by the browser.
 api.interceptors.response.use(
   (response) => {
-    // Some endpoints may echo the CSRF token back in the body; refresh our
-    // copy so subsequent state-changing requests stay in sync.
-    if (response.data && typeof response.data.csrfToken === 'string') {
+    const headerToken = response.headers?.['x-csrf-token'];
+    if (typeof headerToken === 'string' && headerToken) {
+      csrfToken = headerToken;
+    } else if (response.data && typeof response.data.csrfToken === 'string') {
       csrfToken = response.data.csrfToken;
     }
     return response;
   },
-  (error) => {
+  async (error) => {
+    const original = error.config as (typeof error.config & { _csrfRetried?: boolean }) | undefined;
+    const status = error.response?.status;
+    const message = String(error.response?.data?.message || '');
+
+    // A stale or rotated CSRF token produces a 403. Fetch a fresh token and
+    // replay the request once so the user never sees a spurious failure.
+    const isStateChanging = ['post', 'put', 'patch', 'delete'].includes(
+      String(original?.method || 'get').toLowerCase(),
+    );
+    if (
+      status === 403 &&
+      isStateChanging &&
+      original &&
+      !original._csrfRetried &&
+      /csrf/i.test(message)
+    ) {
+      original._csrfRetried = true;
+      try {
+        const res = await api.get('/csrf-token');
+        const token = res.headers?.['x-csrf-token'] || res.data?.csrfToken;
+        if (typeof token === 'string' && token) {
+          csrfToken = token;
+          original.headers = { ...(original.headers || {}), 'x-csrf-token': token };
+          return api(original);
+        }
+      } catch {
+        // Fall through to the original error.
+      }
+    }
+
     // On 401, redirect to login
-    if (error.response && error.response.status === 401) {
+    if (status === 401) {
       if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
         window.location.href = '/login';
       }

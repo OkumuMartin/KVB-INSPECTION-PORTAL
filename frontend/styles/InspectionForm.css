@@ -695,6 +695,20 @@
   white-space: nowrap;
 }
 
+/* Capture metadata shown under the coordinate fields */
+.gps-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.82rem;
+  color: #4b5563;
+  margin-top: -0.5rem;
+}
+
+.gps-meta i {
+  color: #1a7b32;
+}
+
 .gps-status-success {
   background: rgba(26, 123, 50, 0.1);
   color: var(--kvb-green-dark);
@@ -1115,6 +1129,41 @@
   background: #ffffff;
   color: #102a43;
   font-size: 0.95rem;
+}
+
+/* Full-width dropdown used for enumerated form fields (e.g. level of training) */
+.inspection-select {
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid #d2d6dc;
+  border-radius: 0.4rem;
+  background: #ffffff;
+  color: #102a43;
+  font-size: 0.95rem;
+  min-height: 42px;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath fill='%23102a43' d='M1.4 0 6 4.6 10.6 0 12 1.4 6 7.4 0 1.4z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.7rem center;
+  background-size: 0.7rem auto;
+  padding-right: 2rem;
+}
+
+.inspection-select:focus {
+  outline: 2px solid rgba(26, 123, 50, 0.35);
+  outline-offset: 1px;
+  border-color: #1a7b32;
+}
+
+.inspection-select:disabled {
+  background-color: #f3f4f6;
+  color: #6b7280;
+  cursor: not-allowed;
+}
+
+.inspection-select[aria-invalid='true'] {
+  border-color: var(--kvb-red, #dc2626);
 }
 
 .inspection-checkbox {

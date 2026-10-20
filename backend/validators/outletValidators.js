@@ -12,6 +12,30 @@ function sanitizeString(value) {
   return value.trim();
 }
 
+/**
+ * Coordinates are stored as strings. Round to 7 decimal places (~1 cm) and
+ * normalise the representation so a device fix never lands in exponential
+ * notation.
+ */
+function sanitizeCoordinate(value) {
+  if (value === undefined || value === null || value === '') return value;
+  const parsed = typeof value === 'number' ? value : Number(String(value).trim());
+  if (!Number.isFinite(parsed)) return value;
+  return String(Number(parsed.toFixed(7)));
+}
+
+function isValidLatitude(value) {
+  if (value === undefined || value === null || value === '') return true;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed >= -90 && parsed <= 90;
+}
+
+function isValidLongitude(value) {
+  if (value === undefined || value === null || value === '') return true;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed >= -180 && parsed <= 180;
+}
+
 const outletValidator = [
   body('outletName')
     .customSanitizer(sanitizeString)
@@ -61,6 +85,21 @@ const outletValidator = [
     .customSanitizer(sanitizeString)
     .isLength({ max: 100 })
     .withMessage('KVB registration info must not exceed 100 characters.'),
+  body('latitude')
+    .optional({ checkFalsy: true })
+    .customSanitizer(sanitizeCoordinate)
+    .custom(isValidLatitude)
+    .withMessage('Latitude must be a number between -90 and 90.'),
+  body('longitude')
+    .optional({ checkFalsy: true })
+    .customSanitizer(sanitizeCoordinate)
+    .custom(isValidLongitude)
+    .withMessage('Longitude must be a number between -180 and 180.'),
+  body('locationSource')
+    .optional({ checkFalsy: true })
+    .customSanitizer(sanitizeString)
+    .isLength({ max: 30 })
+    .withMessage('Location source must not exceed 30 characters.'),
 ];
 
 module.exports = {

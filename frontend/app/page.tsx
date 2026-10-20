@@ -248,7 +248,7 @@ export default function LandingPage() {
               <div className="kvb-service-row">
                 {kvbServicesRow1.map((service) => (
                   <div key={service.title} className="kvb-service-card">
-                    <div className="kvb-service-icon">
+                    <div className="kvb-landing-service-icon">
                       <i className={`fa ${service.icon}`}></i>
                     </div>
                     <h3>{service.title}</h3>
@@ -259,7 +259,7 @@ export default function LandingPage() {
               <div className="kvb-service-row">
                 {kvbServicesRow2.map((service) => (
                   <div key={service.title} className="kvb-service-card">
-                    <div className="kvb-service-icon">
+                    <div className="kvb-landing-service-icon">
                       <i className={`fa ${service.icon}`}></i>
                     </div>
                     <h3>{service.title}</h3>

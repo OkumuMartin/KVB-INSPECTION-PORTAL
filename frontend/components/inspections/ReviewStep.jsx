@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { FormField, FormSection, Checkbox } from './FormField';
-import { getFinding, summarizeFindings, formatDisplayDate, toDateInputValue, findStatusOptions, OUTLET_TYPE_OPTIONS } from '../../lib/inspectionForm';
+import { getFinding, summarizeFindings, formatDisplayDate, toDateInputValue, findStatusOptions, OUTLET_TYPE_OPTIONS, FALLBACK_TRAINING_LEVELS, trainingLevelOptions } from '../../lib/inspectionForm';
 
 function ReviewRow({ label, value }) {
   return (
@@ -39,13 +39,14 @@ function productLabels(products, productGroups) {
 }
 
 export default function ReviewStep({
-  inspectionNumber,
-  inspectionDate,
-  formData,
-  findingSections,
-  productGroups,
-  outletTypeLabels,
-  outletRecordName,
+    inspectionNumber,
+    inspectionDate,
+    formData,
+    findingSections,
+    productGroups,
+    outletTypeLabels,
+    outletRecordName,
+    trainingLevels = FALLBACK_TRAINING_LEVELS,
   // Edit handlers
   updateOutletField,
   updateOwnerField,
@@ -223,13 +224,18 @@ export default function ReviewStep({
               />
             </FormField>
             <FormField id="edit-trainingLevel" label="Level of Training in Animal Health">
-              <input
+              <select
                 id="edit-trainingLevel"
-                type="text"
                 value={ownerInformation.trainingLevel}
                 onChange={(event) => updateOwnerField('trainingLevel', event.target.value)}
                 disabled={readOnly}
-              />
+                className="inspection-select"
+              >
+                <option value="">Select level of training</option>
+                {trainingLevelOptions(trainingLevels, ownerInformation.trainingLevel).map((level) => (
+                  <option key={level} value={level}>{level}</option>
+                ))}
+              </select>
             </FormField>
             <FormField id="edit-ownerAddress" label="Address">
               <textarea

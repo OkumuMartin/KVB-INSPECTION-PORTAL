@@ -88,6 +88,18 @@ const LIMITS = {
   maxOtherProductsDescription: 200,
 };
 
+/**
+ * Section 4(i) of the KVB questionnaire asks for the owner's "Level of
+ * Training in Animal Health". The paper form offers a fixed set, so the
+ * portal presents a dropdown and the server rejects anything outside it.
+ */
+const TRAINING_LEVELS = [
+  'Certificate in Animal Health',
+  'Diploma in Animal Health',
+  'Degree in Animal Health',
+  'No Formal Training',
+];
+
 const FINDING_SECTIONS = [
   {
     key: 'professionalCertificates',
@@ -225,6 +237,7 @@ function buildFormSchema() {
       })),
     })),
     limits: LIMITS,
+    trainingLevels: TRAINING_LEVELS,
     submissionRequirements: SUBMISSION_REQUIREMENTS,
     maxAttendants: LIMITS.maxAttendants,
   };
@@ -250,6 +263,7 @@ module.exports = {
   PRODUCT_GROUPS,
   ALL_PRODUCTS,
   LIMITS,
+  TRAINING_LEVELS,
   SUBMISSION_REQUIREMENTS,
   COMPLIANT_STATUSES,
   buildFormSchema,

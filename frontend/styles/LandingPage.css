@@ -673,7 +673,10 @@
   border-bottom-color: var(--kvb-gold);
 }
 
-.kvb-service-icon {
+/* Scoped to the landing page. The generic `.kvb-service-icon` class belongs
+   to the login panel (globals.css) and is only 26px; sharing the name made
+   the landing stylesheet inflate the login panel icons on navigation. */
+.kvb-landing-service-icon {
   width: 80px;
   height: 80px;
   margin: 0 auto 0.75rem;
