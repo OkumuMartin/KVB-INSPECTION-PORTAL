@@ -314,7 +314,7 @@ export default function LandingPage() {
                     </div>
                     <div className="lp-demo-body">
                       <div className="lp-demo-title">Inspection #VIP-2026-0042</div>
-                      <p>Pep Stores Ltd — Nairobi</p>
+                      <p>Pep Stores Ltd â€” Nairobi</p>
                       <div className="lp-demo-progress">
                         <span className="lp-progress-step lp-progress-complete">?</span>
                         <span className="lp-progress-step lp-progress-complete">?</span>
@@ -391,7 +391,7 @@ export default function LandingPage() {
                 </p>
                 <p className="kvb-about-sub">
                   Through its Inspection Portal, KVB monitors veterinary input outlets across all 47 counties, ensuring products
-                  meet safety standards, prescriptions are maintained, and regulatory compliance is upheld — protecting animal and
+                  meet safety standards, prescriptions are maintained, and regulatory compliance is upheld â€” protecting animal and
                   public health through rigorous on-site assessments and digital reporting.
                 </p>
               </div>
@@ -410,7 +410,7 @@ export default function LandingPage() {
                 <blockquote className="kvb-mandate-text">
                   To exercise general supervision and control over the training, business, practice
                   and employment of veterinary surgeons and veterinary paraprofessionals in Kenya.
-                  <cite> — Veterinary Surgeons' and Veterinary Para-professionals Act No. 29 of 2011</cite>
+                  <cite> â€” Veterinary Surgeons' and Veterinary Para-professionals Act No. 29 of 2011</cite>
                 </blockquote>
                 <div className="kvb-tags">
                   <span className="kvb-tag">Licensed Outlets</span>
@@ -526,13 +526,13 @@ export default function LandingPage() {
                       </div>
                     </div>
                     <div className="kvb-footer-tagline">
-                      Veterinary Inspection Portal — a digital gateway for managing veterinary inputs outlet inspections across Kenya.
+                      Veterinary Inspection Portal â€” a digital gateway for managing veterinary inputs outlet inspections across Kenya.
                     </div>
                     <div className="kvb-footer-contact">
                       <span><i className="fa fa-phone"></i> Tel: +254-722 305 253</span>
                       <span><i className="fa fa-mobile-alt"></i> +254-701 581 718</span>
                       <span><i className="fa fa-envelope"></i> info@kenyavetboard.or.ke</span>
-                      <span><i className="fa fa-map-marker-alt"></i> P.O. Box 513 – 00605, Uthiru, Nairobi</span>
+                      <span><i className="fa fa-map-marker-alt"></i> P.O. Box 513 â€“ 00605, Uthiru, Nairobi</span>
                     </div>
                   </div>
                 </div>
