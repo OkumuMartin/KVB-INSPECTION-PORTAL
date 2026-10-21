@@ -209,6 +209,7 @@ function RevealSection({ children, className = '' }: { children: React.ReactNode
   );
 }
 
+/* build-fix */
 export default function LandingPage() {
   const { user } = useAuth();
   const [mounted] = useState(true);
