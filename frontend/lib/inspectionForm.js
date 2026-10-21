@@ -96,6 +96,7 @@ export const PRODUCT_GROUPS = [
     items: [
       { key: 'agricultural', label: 'Agricultural' },
       { key: 'feedsAndSalts', label: 'Feeds and Salts' },
+      { key: 'vaccines', label: 'Vaccines' },
       { key: 'others', label: 'Others' },
     ],
   },
@@ -196,7 +197,7 @@ export function createEmptyFormData({ inspectorName = '', inspectionDate = '' } 
     ],
     products: {
       veterinaryMedicines: { category1: false, category2: false, category3: false, category4: false },
-      otherProducts: { agricultural: false, feedsAndSalts: false, others: false, otherDescription: '' },
+      otherProducts: { agricultural: false, feedsAndSalts: false, vaccines: false, others: false, otherDescription: '' },
     },
     findings: emptyFindings(),
     otherComments: '',

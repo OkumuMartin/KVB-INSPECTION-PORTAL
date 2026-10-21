@@ -178,6 +178,7 @@ const PRODUCT_GROUPS = [
     items: [
       { key: 'agricultural', label: 'Agricultural' },
       { key: 'feedsAndSalts', label: 'Feeds and Salts' },
+      { key: 'vaccines', label: 'Vaccines' },
       { key: 'others', label: 'Others' },
     ],
   },
