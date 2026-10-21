@@ -119,6 +119,7 @@ export const FALLBACK_TRAINING_LEVELS = [
   'Certificate in Animal Health',
   'Diploma in Animal Health',
   'Degree in Animal Health',
+  'Bachelor in Veterinary Medicine (BVM)',
   'No Formal Training',
 ];
 
