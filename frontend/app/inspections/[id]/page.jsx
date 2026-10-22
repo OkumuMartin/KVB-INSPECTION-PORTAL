@@ -152,16 +152,21 @@ export default function InspectionDetailPage() {
     }
   }, [steps, formData, outletId, inspectionDate, findingSections, setErrors, goToStep, mode, saveMutation, submitMutation, id, loadInspection, user]);
 
-  const handleExport = useCallback(() => {
+  const handleExport = useCallback(async () => {
     for (const format of ['pdf', 'word', 'excel']) {
-      const url = backendUrl(`/api/inspections/${id}/export?format=${format}`);
-      const link = document.createElement('a');
-      link.href = url;
-      link.rel = 'noopener noreferrer';
-      link.target = '_blank';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      try {
+        const res = await api.get(`/inspections/${id}/export`, { params: { format }, responseType: 'blob' });
+        const url = window.URL.createObjectURL(new Blob([res.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `inspection-${id}.${format === 'word' ? 'docx' : format === 'excel' ? 'xlsx' : 'pdf'}`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      } catch (error) {
+        console.error('Export failed', error);
+      }
     }
   }, [id]);
 
